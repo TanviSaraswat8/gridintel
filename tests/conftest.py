@@ -14,6 +14,7 @@ os.environ.update({
     "JWT_SECRET": "test-only-secret", "PRIMARY_SUBSTATION": "220-test-a", "REDIS_URL": "", "APP_ENV": "test",
     "LOGIN_RATE_LIMIT_PER_MINUTE": "50", "ADMIN_USERNAME": "admin", "ADMIN_PASSWORD": "admin-test-pass",
 })
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "ml"))
 sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "tests"))
