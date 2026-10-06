@@ -319,26 +319,31 @@ async def replay_start(request: Request, body: ReplayStart | None = None, user: 
     return await replay().start(date=b.date, speed=b.speed, reset=b.reset)
 
 
-@router.post("/replay/pause", tags=["replay"], dependencies=[Depends(require("OPERATOR"))])
-def replay_pause():
+@router.post("/replay/pause", tags=["replay"])
+def replay_pause(request: Request, user: dict = Depends(require("OPERATOR"))):
+    audit(request, user["sub"], "replay.pause")
     return replay().pause()
 
 
-@router.post("/replay/stop", tags=["replay"], dependencies=[Depends(require("OPERATOR"))])
-def replay_stop():
+@router.post("/replay/stop", tags=["replay"])
+def replay_stop(request: Request, user: dict = Depends(require("OPERATOR"))):
+    audit(request, user["sub"], "replay.stop")
     return replay().stop()
 
 
-@router.post("/replay/next", tags=["replay"], dependencies=[Depends(require("OPERATOR"))])
-def replay_next():
+@router.post("/replay/next", tags=["replay"])
+def replay_next(request: Request, user: dict = Depends(require("OPERATOR"))):
+    audit(request, user["sub"], "replay.next")
     return replay().next()
 
 
-@router.post("/replay/speed", tags=["replay"], dependencies=[Depends(require("OPERATOR"))])
-def replay_speed(body: Speed):
+@router.post("/replay/speed", tags=["replay"])
+def replay_speed(request: Request, body: Speed, user: dict = Depends(require("OPERATOR"))):
+    audit(request, user["sub"], "replay.speed", {"speed": body.speed})
     return replay().set_speed(body.speed)
 
 
-@router.post("/replay/seek", tags=["replay"], dependencies=[Depends(require("OPERATOR"))])
-def replay_seek(body: Seek):
+@router.post("/replay/seek", tags=["replay"])
+def replay_seek(request: Request, body: Seek, user: dict = Depends(require("OPERATOR"))):
+    audit(request, user["sub"], "replay.seek", {"timestamp": body.timestamp})
     return replay().seek(body.timestamp if len(body.timestamp) == 19 else body.timestamp + ":00")

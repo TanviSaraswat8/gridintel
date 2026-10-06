@@ -138,3 +138,15 @@ def test_login_rate_limit(client):
 def test_errors_are_structured(client, op, path):
     r = client.get(path, headers=op)
     assert r.status_code in (404, 422) and "request_id" in r.json()
+
+
+def test_every_replay_control_is_audited(client, op, admin):
+    client.post("/api/v1/replay/stop", headers=op)
+    client.post("/api/v1/replay/seek", json={"timestamp": "2026-02-02T03:00"}, headers=op)
+    client.post("/api/v1/replay/next", headers=op)
+    client.post("/api/v1/replay/speed", json={"speed": 5}, headers=op)
+    client.post("/api/v1/replay/pause", headers=op)
+    rows = client.get("/api/v1/auth/audit", headers=admin).json()
+    rows = rows.get("items", rows) if isinstance(rows, dict) else rows
+    actions = {r["action"] for r in rows}
+    assert {"replay.stop", "replay.seek", "replay.next", "replay.speed", "replay.pause"} <= actions
