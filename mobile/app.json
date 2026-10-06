@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "GridSentinel",
+    "slug": "gridsentinel-substation",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0b0f14",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "backgroundColor": "#0b0f14",
+    "splash": {
+      "backgroundColor": "#0b0f14"
+    },
+    "experiments": {
+      "baseUrl": "/mobile"
+    }
+  }
+}
