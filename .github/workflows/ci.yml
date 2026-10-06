@@ -76,12 +76,6 @@ jobs:
     permissions: { contents: read, packages: write }
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "22", cache: npm, cache-dependency-path: mobile/package-lock.json }
-      - name: Build mobile web bundle (copied into the image)
-        working-directory: mobile
-        run: npm ci && npx expo export --platform web --output-dir dist
-        env: { CI: "1", EXPO_OFFLINE: "1" }
       - name: Lower-case image name (registry names must be lowercase)
         run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/gridintel-api" >> "$GITHUB_ENV"
       - uses: docker/setup-buildx-action@v3

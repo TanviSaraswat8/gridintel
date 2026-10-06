@@ -64,6 +64,8 @@ class Settings(BaseModel):
     demo_users_enabled: bool = os.getenv("DEMO_USERS_ENABLED", "true").lower() == "true"
     admin_username: str = os.getenv("ADMIN_USERNAME", "")
     admin_password: str = os.getenv("ADMIN_PASSWORD", "")
+    # train from DATA_ROOT/raw at start when no artifacts exist (needs ~1 GB RAM; disable on small instances)
+    train_on_start: bool = os.getenv("TRAIN_ON_START", "true").lower() == "true"
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
 
     @property

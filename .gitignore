@@ -37,3 +37,6 @@ mobile/dist/
 frontend/config.js.bak
 .DS_Store
 Thumbs.db
+
+# --- packaged private artifact bundles
+dist/

@@ -20,7 +20,7 @@ from sqlalchemy import text
 from starlette.exceptions import HTTPException
 
 from .api.deps import STATE
-from .api.v1 import auth, grid, intel
+from .api.v1 import admin, auth, grid, intel
 from .core.cache import cache, init_cache
 from .core.config import DISCLAIMER, ROOT, get_settings
 from .core.observability import ERRORS, HTTP_LATENCY, HTTP_REQUESTS, metrics_payload, request_id_var, setup_logging
@@ -33,41 +33,43 @@ log = logging.getLogger("gridintel.api")
 
 
 def _load_store():
+    """Local artifacts → newest bundle stored in the database → train from raw workbooks → None (awaiting data)."""
+    from .services import artifacts
     from .services.store import Store
     try:
         return Store()
     except FileNotFoundError as e:
-        log.warning(f"model artifacts missing ({e}); running training pipeline")
+        log.warning(f"model artifacts missing locally ({e})")
     except Exception as e:  # version mismatch etc.
-        log.warning(f"model artifacts unusable ({type(e).__name__}: {e}); retraining")
-    from pipeline.build import main as build
-    build()
-    return Store()
+        log.warning(f"model artifacts unusable ({type(e).__name__}: {e})")
+    try:
+        if artifacts.restore_latest():
+            return Store()
+    except Exception as e:
+        log.error(f"stored artifact bundle could not be restored ({type(e).__name__}: {e})")
+    raw = settings.data_root / "raw"
+    if settings.train_on_start and raw.exists() and any(raw.glob("*.xlsx")):
+        log.warning("training pipeline from raw workbooks")
+        from pipeline.build import main as build
+        build()
+        return Store()
+    log.warning("no model artifacts and no raw data: API running in AWAITING DATA mode "
+                "(an ADMIN can upload a bundle at POST /api/v1/admin/artifacts)")
+    return None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from .services.replay import ReplayEngine
-    from .services.seed import seed_reference, seed_users
+    from .services.runtime import install_store
+    from .services.seed import seed_users
     init_cache(settings.redis_url)
     Base.metadata.create_all(engine)          # no-op when Alembic migrations already created the schema
     seed_users()
     store = _load_store()
-    seed_reference(store)
-    STATE["store"] = store
-    STATE["replay"] = ReplayEngine(store)
-    STATE["replay"]._reset(None)               # replay alerts belong to a replay session; start clean (state: IDLE)
-    STATE["replay"].processed.clear()
-
-    def warm():                                # pre-compute explanations for flagged hours so first page loads are fast
-        for r in store.scored[store.scored.risk_score > 30].itertuples():
-            try:
-                store.explain(store.by_sheet[r.substation]["id"], r.timestamp)
-            except Exception:  # pragma: no cover
-                pass
-    import threading
-    threading.Thread(target=warm, daemon=True).start()
-    log.info("startup complete", extra={"event": "startup", "detail": {"env": settings.app_env, "cache": cache().name}})
+    if store is not None:
+        install_store(store)
+    log.info("startup complete", extra={"event": "startup", "detail": {"env": settings.app_env, "cache": cache().name,
+                                                                       "data": "LOADED" if store is not None else "AWAITING DATA"}})
     yield
 
 
@@ -135,7 +137,7 @@ def health():
 
 @app.get("/ready", tags=["system"])
 def ready():
-    checks = {"model_store": "store" in STATE, "cache": cache().name}
+    checks = {"model_store": "store" in STATE, "cache": cache().name, "data": "LOADED" if "store" in STATE else "AWAITING DATA"}
     try:
         with engine.connect() as c:
             c.execute(text("SELECT 1"))
@@ -152,7 +154,7 @@ def metrics():
     return Response(body, media_type=ctype)
 
 
-for r in (auth.router, grid.router, intel.router):
+for r in (auth.router, grid.router, intel.router, admin.router):
     app.include_router(r, prefix="/api/v1")
 
 # ---- static web app (also deployable separately to Vercel) and mobile web build

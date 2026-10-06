@@ -1,32 +1,35 @@
-# Render Blueprint: API (Docker) + managed PostgreSQL + Redis (Key Value).
-# Dashboard → New → Blueprint → select this repo. Then upload the private HVPNL workbooks to the disk at /data/raw.
+# Render Blueprint — one web service (API + web command center + mobile web build) and managed PostgreSQL.
+# Dashboard → New → Blueprint → select this repo.
+#
+# Free plan notes: the service sleeps after ~15 min idle (first request wakes it in ~1 min) and has no disk.
+# Trained models are NOT in the image or the repo: after the first deploy an ADMIN uploads the private bundle
+#   python scripts/package_artifacts.py --upload https://<service>.onrender.com --username <ADMIN_USERNAME>
+# The API stores it in PostgreSQL and restores it on every start. Training is disabled on the server
+# (TRAIN_ON_START=false): it needs ~1 GB RAM.
 services:
   - type: web
-    name: gridintel-api
+    name: gridintel
     runtime: docker
-    plan: starter
+    plan: free
+    region: singapore
     healthCheckPath: /health
-    disk: { name: gridintel-data, mountPath: /data, sizeGB: 1 }
+    autoDeploy: true
     envVars:
       - { key: APP_ENV, value: production }
       - { key: DATA_ROOT, value: /data }
-      - { key: MODEL_PATH, value: /data/models }
-      - { key: REPORTS_DIR, value: /data/models/reports }
+      - { key: MODEL_PATH, value: /models }
+      - { key: REPORTS_DIR, value: /models/reports }
+      - { key: TRAIN_ON_START, value: "false" }
       - { key: JWT_SECRET, generateValue: true }
-      - { key: CORS_ORIGINS, sync: false }          # e.g. https://gridintel.vercel.app
-      - { key: API_URL, sync: false }               # public URL of this service
-      - { key: DEMO_USERS_ENABLED, value: "true" }  # set false for real deployments
-      - { key: ADMIN_USERNAME, sync: false }
-      - { key: ADMIN_PASSWORD, sync: false }
+      - { key: DEMO_USERS_ENABLED, value: "false" }
+      - { key: ADMIN_USERNAME, sync: false }       # set in the dashboard
+      - { key: ADMIN_PASSWORD, sync: false }       # set in the dashboard (never commit)
+      - { key: CORS_ORIGINS, sync: false }         # https://<service>.onrender.com
       - key: DATABASE_URL
         fromDatabase: { name: gridintel-db, property: connectionString }
-      - key: REDIS_URL
-        fromService: { type: keyvalue, name: gridintel-redis, property: connectionString }
-  - type: keyvalue
-    name: gridintel-redis
-    plan: free
-    ipAllowList: []
 databases:
   - name: gridintel-db
-    plan: basic-256mb
+    plan: free
+    region: singapore
     databaseName: gridintel
+    ipAllowList: []          # internal connections only

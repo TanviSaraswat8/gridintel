@@ -143,7 +143,15 @@ Repository layout: `backend/` (FastAPI app, Alembic migrations) · `ml/pipeline/
 | Mobile | Expo | `EXPO_PUBLIC_API_URL` or set on sign-in |
 | CI/CD | GitHub Actions | `.github/workflows/ci.yml`, `deploy.yml` |
 
-Step-by-step: [docs/deployment.md](docs/deployment.md). Private data is supplied to the API through a persistent disk at `DATA_ROOT/raw`; models are trained at first start.
+Step-by-step: [docs/deployment.md](docs/deployment.md).
+
+**Private data in a stateless deployment.** Neither the repository nor the container image contains HVPNL data or models. One Render web service serves the API, the web command center (`/`, `/app`) and the mobile web build (`/mobile`). After the first deploy it starts in *AWAITING DATA* mode; an ADMIN uploads the trained bundle:
+
+```bash
+python scripts/package_artifacts.py --upload https://<service>.onrender.com --username <ADMIN_USERNAME>
+```
+
+The bundle is validated (allowed paths only, no links, size caps), stored in PostgreSQL and restored on every start, so free-tier instances that sleep and lose their disk come back without retraining. Training on the server is off (`TRAIN_ON_START=false`) because it needs ~1 GB RAM; serving needs ~220 MB.
 
 ## Environment variables
 

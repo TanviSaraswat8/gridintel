@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Index, Integer, LargeBinary, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -153,3 +153,17 @@ class AuditLog(Base):
     detail: Mapped[dict | None] = mapped_column(JSON)
     ip: Mapped[str | None] = mapped_column(String(64))
     request_id: Mapped[str | None] = mapped_column(String(64))
+
+
+class ArtifactBundle(Base):
+    """Trained-model bundle (models, processed data, reports) uploaded by an ADMIN. Kept in the database so a
+    stateless container restores it on start instead of retraining. Contains private-data derivatives:
+    the database must not be publicly reachable."""
+    __tablename__ = "artifact_bundles"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    uploaded_by: Mapped[str] = mapped_column(String(64))
+    sha256: Mapped[str] = mapped_column(String(64))
+    size_bytes: Mapped[int] = mapped_column(Integer)
+    manifest: Mapped[dict | None] = mapped_column(JSON)
+    data: Mapped[bytes] = mapped_column(LargeBinary)

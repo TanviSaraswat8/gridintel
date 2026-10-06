@@ -9,13 +9,18 @@ from ..db.session import session_scope
 STATE: dict = {}
 
 
+AWAITING = "No model artifacts loaded yet — an administrator must upload the trained bundle (POST /api/v1/admin/artifacts)."
+
+
 def store():
     if "store" not in STATE:
-        raise HTTPException(503, "Model store not loaded")
+        raise HTTPException(503, AWAITING)
     return STATE["store"]
 
 
 def replay():
+    if "replay" not in STATE:
+        raise HTTPException(503, AWAITING)
     return STATE["replay"]
 
 

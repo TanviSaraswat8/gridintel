@@ -14,3 +14,10 @@ data/external
 data/*.db
 models/ensemble
 experiments
+mobile/dist
+dist
+models/*.json
+models/**/metadata.json
+reports/evaluation.*
+reports/data_quality.*
+reports/benchmarks.json
