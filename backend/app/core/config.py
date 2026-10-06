@@ -54,7 +54,10 @@ class Settings(BaseModel):
     redis_url: str = os.getenv("REDIS_URL", "")
     jwt_secret: str = os.getenv("JWT_SECRET", "")
     jwt_expire_minutes: int = int(os.getenv("JWT_EXPIRE_MINUTES", "480"))
-    cors_origins: list[str] = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
+    # CORS: explicit list, else the host's own public URL (Render sets RENDER_EXTERNAL_URL), else "*" outside production.
+    # The web app is served from the API's own origin, so production needs no cross-origin access by default.
+    cors_origins: list[str] = [o.strip() for o in (os.getenv("CORS_ORIGINS") or os.getenv("RENDER_EXTERNAL_URL")
+                               or ("" if os.getenv("APP_ENV") == "production" else "*")).split(",") if o.strip()]
     rate_limit_per_minute: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "600"))
     login_rate_limit_per_minute: int = int(os.getenv("LOGIN_RATE_LIMIT_PER_MINUTE", "20"))
     auth_required: bool = os.getenv("AUTH_REQUIRED", "true").lower() == "true"
@@ -67,6 +70,19 @@ class Settings(BaseModel):
     # train from DATA_ROOT/raw at start when no artifacts exist (needs ~1 GB RAM; disable on small instances)
     train_on_start: bool = os.getenv("TRAIN_ON_START", "true").lower() == "true"
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
+    # LOCAL REAL-DATA MODE: the private HVPNL workbooks are on this machine (raw cell text available).
+    # PUBLIC DEMO MODE: only model artifacts + derived values from an uploaded bundle; raw cell text is never served.
+    data_mode_env: str = os.getenv("DATA_MODE", "").lower()
+
+    @property
+    def data_mode(self) -> str:
+        if self.data_mode_env in ("local", "public"):
+            return self.data_mode_env
+        return "local" if any((self.data_root / "raw").glob("*.xlsx")) else "public"
+
+    @property
+    def data_mode_label(self) -> str:
+        return "LOCAL REAL-DATA MODE" if self.data_mode == "local" else "PUBLIC DEMO MODE"
 
     @property
     def processed_dir(self) -> Path:

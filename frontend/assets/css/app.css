@@ -246,3 +246,7 @@ td.n, th.n { text-align: right; font-family: var(--mono); }
   .crumbs { min-width: 0; flex: 1; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+.mode-pill.data { color: var(--NORMAL); border-color: rgba(60,196,131,.5); background: rgba(60,196,131,.07); margin-left: 6px; }
+.mode-pill.data.public { color: #38c8e8; border-color: rgba(56,200,232,.5); background: rgba(56,200,232,.07); }
+@media (max-width: 1280px) { .mode-pill.data { display: none; } }

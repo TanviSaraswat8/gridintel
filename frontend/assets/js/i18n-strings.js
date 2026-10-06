@@ -253,6 +253,12 @@ window.GI_STRINGS = {
 "hry": "बणावट",
 "pa": "ਢਾਂਚਾ"
 },
+"Artifact bundle": {
+"en": "Artifact bundle",
+"hi": "आर्टिफ़ैक्ट बंडल",
+"hry": "आर्टिफ़ैक्ट बंडल",
+"pa": "ਆਰਟੀਫ਼ੈਕਟ ਬੰਡਲ"
+},
 "Artifacts": {
 "en": "Artifacts",
 "hi": "आर्टिफ़ैक्ट",
@@ -270,6 +276,12 @@ window.GI_STRINGS = {
 "hi": "ऑटोएनकोडर",
 "hry": "ऑटोएनकोडर",
 "pa": "ਆਟੋਐਨਕੋਡਰ"
+},
+"Awaiting data": {
+"en": "Awaiting data",
+"hi": "डेटा का इंतज़ार",
+"hry": "डेटा की बाट",
+"pa": "ਡਾਟਾ ਦੀ ਉਡੀਕ"
 },
 "BREAKER / CIRCUIT STATE": {
 "en": "BREAKER / CIRCUIT STATE",
@@ -1117,6 +1129,12 @@ window.GI_STRINGS = {
 "hry": "लोड का रुझान",
 "pa": "ਲੋਡਿੰਗ ਰੁਝਾਨ"
 },
+"LOCAL REAL-DATA MODE": {
+"en": "LOCAL REAL-DATA MODE",
+"hi": "लोकल असली-डेटा मोड",
+"hry": "लोकल असली-डेटा मोड",
+"pa": "ਲੋਕਲ ਅਸਲ-ਡਾਟਾ ਮੋਡ"
+},
 "LODO out-of-sample": {
 "en": "LODO out-of-sample",
 "hi": "LODO अनदेखे दिन पर",
@@ -1554,6 +1572,18 @@ window.GI_STRINGS = {
 "hi": "प्रोफ़ाइल",
 "hry": "प्रोफ़ाइल",
 "pa": "ਪ੍ਰੋਫ਼ਾਈਲ"
+},
+"PUBLIC DEMO MODE": {
+"en": "PUBLIC DEMO MODE",
+"hi": "पब्लिक डेमो मोड",
+"hry": "पब्लिक डेमो मोड",
+"pa": "ਪਬਲਿਕ ਡੈਮੋ ਮੋਡ"
+},
+"PUBLIC DEMO MODE: verbatim Excel cell text is kept local; cleaned = parsed numeric value (missing kept as null).": {
+"en": "PUBLIC DEMO MODE: verbatim Excel cell text is kept local; cleaned = parsed numeric value (missing kept as null).",
+"hi": "पब्लिक डेमो मोड: Excel की मूल सेल टेक्स्ट लोकल रखी जाती है; cleaned = पढ़ा गया संख्यात्मक मान (खाली मान null)।",
+"hry": "पब्लिक डेमो मोड: Excel की असली सेल टेक्स्ट लोकल राखी जा सै; cleaned = पढ़्या होया अंक (खाली मान null)।",
+"pa": "ਪਬਲਿਕ ਡੈਮੋ ਮੋਡ: Excel ਦੀ ਮੂਲ ਸੈੱਲ ਟੈਕਸਟ ਲੋਕਲ ਰੱਖੀ ਜਾਂਦੀ ਹੈ; cleaned = ਪੜ੍ਹਿਆ ਅੰਕੀ ਮੁੱਲ (ਖ਼ਾਲੀ ਮੁੱਲ null)।"
 },
 "Parameter": {
 "en": "Parameter",
@@ -2304,6 +2334,12 @@ window.GI_STRINGS = {
 "hi": "बिना लेबल का मूल्यांकन",
 "hry": "बिना लेबल की जाँच",
 "pa": "ਬਿਨਾਂ ਲੇਬਲ ਮੁਲਾਂਕਣ"
+},
+"Upload and load models": {
+"en": "Upload and load models",
+"hi": "अपलोड करें और मॉडल लोड करें",
+"hry": "अपलोड करो अर मॉडल लोड करो",
+"pa": "ਅਪਲੋਡ ਕਰੋ ਅਤੇ ਮਾਡਲ ਲੋਡ ਕਰੋ"
 },
 "Username": {
 "en": "Username",

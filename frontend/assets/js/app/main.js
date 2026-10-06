@@ -1,5 +1,5 @@
 // GridIntel web — boot, auth, router, replay polling, command palette, keyboard shortcuts.
-import { S, api, color, confirmDialog, destroyCharts, errorState, esc, logout, toast, ts } from "./core.js";
+import { API, S, api, color, confirmDialog, destroyCharts, errorState, esc, logout, toast, ts } from "./core.js";
 import * as V from "./views.js";
 
 const $ = (q) => document.querySelector(q);
@@ -23,14 +23,50 @@ $("#loginForm").onsubmit = async (e) => {
 };
 $("#logout").onclick = () => logout();
 
+// ------------------------------------------------------------------------------------- first-run setup (hosted deployments)
+// A hosted instance starts in AWAITING DATA mode: no private workbooks, no models. An ADMIN uploads the artifact
+// bundle made by scripts/package_artifacts.py (model artifacts + derived values; verbatim Excel cells are stripped).
+function showSetup() {
+  $("#shell").hidden = true; $("#login").hidden = false;
+  $("#loginForm").innerHTML = `<a class="logo" href="/"><img src="/assets/img/mark.svg" alt="" /><span data-noi18n>GRID<b>INTEL</b></span></a>
+    <h1>Awaiting data</h1>
+    <p class="dim">This deployment has no model artifacts yet. Upload the bundle file <span class="mono">gridintel-artifacts.tar.gz</span> made on the local machine with <span class="mono">python scripts/package_artifacts.py</span>.</p>
+    <label>Artifact bundle<input type="file" id="bundleFile" accept=".gz,.tgz,application/gzip" required /></label>
+    <div class="err" id="loginErr" role="alert"></div>
+    <button class="btn btn-primary" type="submit" id="bundleBtn">Upload and load models</button>
+    <button class="btn btn-ghost btn-sm" type="button" id="setupOut">Sign out</button>
+    <p class="faint tiny">PUBLIC DEMO MODE · the private HVPNL Excel files are never uploaded.</p>`;
+  $("#setupOut").onclick = () => { logout(); location.reload(); };
+  $("#loginForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = $("#bundleFile").files[0]; if (!f) return;
+    $("#bundleBtn").disabled = true; $("#loginErr").textContent = "Uploading…";
+    try {
+      const r = await fetch(API + "/admin/artifacts", { method: "POST", headers: { Authorization: "Bearer " + S.token, "Content-Type": "application/gzip" }, body: f });
+      const j = await r.json();
+      if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail));
+      $("#loginErr").textContent = `Loaded: ${j.substations_with_data} substations with readings. Opening the Command Center…`;
+      setTimeout(() => location.reload(), 1200);
+    } catch (err) { $("#loginErr").textContent = err.message; $("#bundleBtn").disabled = false; }
+  };
+}
+
 // ------------------------------------------------------------------------------------- boot
 async function start() {
   try {
     const subs = await api("/substations");
     S.subs = subs.items;
-  } catch (e) { if (e.status === 401) return; $("#login").hidden = false; $("#loginErr").textContent = e.message; return; }
+  } catch (e) {
+    if (e.status === 401) return;
+    if (e.status === 503 && S.user?.role === "ADMIN") return showSetup();
+    $("#login").hidden = false; $("#loginErr").textContent = e.message; return;
+  }
   $("#login").hidden = true; $("#shell").hidden = false;
   $("#user").textContent = `${S.user.username} · ${S.user.role}`;
+  fetch(API.replace(/\/api\/v1$/, "") + "/health").then((r) => r.json()).then((h) => {
+    const m = $("#dataMode"); if (!m || !h.data_mode) return;
+    m.textContent = h.data_mode; m.hidden = false; m.classList.toggle("public", h.data_mode.startsWith("PUBLIC"));
+  }).catch(() => {});
   if (!S.subs.find((s) => s.id === S.sid && s.has_model)) S.sid = "220-sec-46";
   $("#subSel").innerHTML = `<optgroup label="With source readings">${S.subs.filter((s) => s.has_model).map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join("")}</optgroup>
     <optgroup label="No source readings">${S.subs.filter((s) => !s.has_model).map((s) => `<option value="${s.id}">${esc(s.name)} — no data</option>`).join("")}</optgroup>`;

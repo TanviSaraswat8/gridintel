@@ -9,7 +9,19 @@ GridIntel turns historical and (future) streaming SCADA data from electrical sub
 ---
 
 ## Contents
-[Overview](#overview) · [Architecture](#architecture) · [Features](#features) · [Dataset methodology](#dataset-methodology) · [ML methodology](#ml-methodology) · [Installation](#installation) · [Development](#development) · [Production deployment](#production-deployment) · [Environment variables](#environment-variables) · [API](#api) · [Mobile app](#mobile-app) · [Languages](#languages) · [Model training](#model-training) · [Evaluation](#evaluation) · [Security](#security) · [Limitations](#limitations)
+[Links](#links) · [Overview](#overview) · [Architecture](#architecture) · [Features](#features) · [Dataset methodology](#dataset-methodology) · [ML methodology](#ml-methodology) · [Installation](#installation) · [Development](#development) · [Production deployment](#production-deployment) · [Environment variables](#environment-variables) · [API](#api) · [Mobile app](#mobile-app) · [Languages](#languages) · [Model training](#model-training) · [Evaluation](#evaluation) · [Security](#security) · [Limitations](#limitations)
+
+## Links
+
+| | URL | Status |
+|---|---|---|
+| GitHub | https://github.com/TanviSaraswat8/gridintel (branch `main`) | live |
+| CI | https://github.com/TanviSaraswat8/gridintel/actions | runs on every push |
+| Web (landing / command center) | `https://<service>.onrender.com/` · `/app` | not deployed yet (needs a Render account; see [docs/deployment.md](docs/deployment.md)) |
+| API | `https://<service>.onrender.com/api/v1` · `/health` · `/ready` · `/docs` | not deployed yet |
+| Mobile (browser build) | `https://<service>.onrender.com/mobile` | not deployed yet |
+
+These rows get the real URLs once the service is live.
 
 ## Overview
 
@@ -22,6 +34,10 @@ GridIntel turns historical and (future) streaming SCADA data from electrical sub
 | API | FastAPI `/api/v1`, JWT + roles, PostgreSQL (Alembic), Redis, structured logs, Prometheus `/metrics`, `/health`, `/ready` |
 | Web | Landing page + Command Center: SCADA Live, Digital Substation, Investigation workspace, Fleet, Analytics, AI Model Lab, Data Explorer |
 | Mobile | Expo / React Native field app on the same API (also served as a browser build at `/mobile`) |
+
+**Data privacy.** The HVPNL Faridabad workbooks are private. They aren't in this repository (`.gitignore`), in the Docker image (CI checks for this) or in any uploaded bundle. The app runs in one of two clearly labelled modes:
+- **LOCAL REAL-DATA MODE**: on your own machine, with the workbooks in `data/raw/`. Full replay, including verbatim Excel cell text in Data Explorer.
+- **PUBLIC DEMO MODE**: on a hosted service. It uses only an admin-uploaded bundle of model artifacts and derived values. Verbatim cell text is stripped, raw file names are hidden, demo logins are off, and every endpoint requires sign-in.
 
 **Data honesty rules (enforced in code and UI):** no fabricated measurements; sheets without readings show *NO SOURCE READINGS*; live ingestion shows *LIVE INGESTION NOT CONNECTED*; demonstrations use *HISTORICAL REPLAY* of the supplied records; no accuracy/precision/recall is reported where no labels exist.
 
@@ -149,14 +165,14 @@ Repository layout: `backend/` (FastAPI app, Alembic migrations) · `ml/pipeline/
 |---|---|---|
 | API | Render (Docker) or any container host | `Dockerfile`, `render.yaml`, `docker-compose.prod.yml` |
 | Database | Managed PostgreSQL | `DATABASE_URL` (migrations run on start) |
-| Cache | Managed Redis / Key Value | `REDIS_URL` (falls back to in-memory if unset) |
-| Web | Vercel (static) | `frontend/vercel.json`, `API_URL` env → `config.js` |
+| Cache | In-memory (single instance); Redis optional | `REDIS_URL` (unset on Render) |
+| Web | Served by the API (same origin); Vercel optional | `frontend/vercel.json`, `API_URL` env → `config.js` |
 | Mobile | Expo | `EXPO_PUBLIC_API_URL` or set on sign-in |
 | CI/CD | GitHub Actions | `.github/workflows/ci.yml`, `deploy.yml` |
 
 Step-by-step: [docs/deployment.md](docs/deployment.md).
 
-**Private data in a stateless deployment.** Neither the repository nor the container image contains HVPNL data or models. One Render web service serves the API, the web command center (`/`, `/app`) and the mobile web build (`/mobile`). After the first deploy it starts in *AWAITING DATA* mode; an ADMIN uploads the trained bundle:
+**Private data in a stateless deployment.** Neither the repository nor the container image contains HVPNL data or models. One Render web service serves the API, the web command center (`/`, `/app`) and the mobile web build (`/mobile`). After the first deploy it starts in *AWAITING DATA* mode. An ADMIN signs in at `/app` and uploads the bundle on the **Awaiting data** screen, or uses the CLI:
 
 ```bash
 python scripts/package_artifacts.py --upload https://<service>.onrender.com --username <ADMIN_USERNAME>
@@ -174,7 +190,8 @@ The bundle is validated (allowed paths only, no links, size caps), stored in Pos
 | `REDIS_URL` | Redis URL | in-memory |
 | `JWT_SECRET` | ≥ 32 chars, **required in production** | ephemeral in dev |
 | `JWT_EXPIRE_MINUTES` | token lifetime | 480 |
-| `CORS_ORIGINS` | comma-separated; explicit origins required in production | `*` (dev) |
+| `CORS_ORIGINS` | comma-separated; `*` refused in production | own URL on Render (`RENDER_EXTERNAL_URL`), `*` in dev |
+| `DATA_MODE` | `local` (real workbooks on this machine) / `public` (uploaded bundle only) | `local` if `data/raw/*.xlsx` exist |
 | `DATA_ROOT` / `MODEL_PATH` / `REPORTS_DIR` | data layers, model registry, reports | `./data`, `./models`, `./reports` |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | bootstrap admin (hashed on first start) | unset |
 | `DEMO_USERS_ENABLED` | demo operator/engineer/viewer | true |

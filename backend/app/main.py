@@ -132,7 +132,8 @@ async def validation_error(request: Request, exc: RequestValidationError):
 
 @app.get("/health", tags=["system"])
 def health():
-    return {"status": "ok", "service": "gridintel-api", "version": settings.version, "env": settings.app_env}
+    return {"status": "ok", "service": "gridintel-api", "version": settings.version, "env": settings.app_env,
+            "data_mode": settings.data_mode_label}
 
 
 @app.get("/ready", tags=["system"])

@@ -39,16 +39,36 @@ def _targets() -> dict[str, Path]:
             "data/features/": s.data_root / "features", "reports/": s.reports_dir}
 
 
-def pack(root: Path) -> bytes:
-    """Build a bundle from a project checkout (used by scripts/package_artifacts.py)."""
+PRIVATE_COLUMNS = {"data/processed/scada_long.csv": ["raw_value"]}   # verbatim Excel cell text stays local
+
+
+def pack(root: Path, public: bool = True) -> bytes:
+    """Build a bundle from a project checkout (used by scripts/package_artifacts.py).
+
+    public=True (default, for any hosted deployment) blanks verbatim Excel cell text, keeping only parsed values,
+    model artifacts and derived metadata. The workbooks themselves are never part of a bundle.
+    """
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
         for prefix in ("models", "data/processed", "data/features", "reports"):
             d = root / prefix
             if d.exists():
                 for f in sorted(d.rglob("*")):
-                    if f.is_file() and "__pycache__" not in f.parts:
-                        tar.add(f, arcname=f.relative_to(root).as_posix())
+                    if not f.is_file() or "__pycache__" in f.parts or f.suffix.lower() in (".xlsx", ".xls"):
+                        continue
+                    arc = f.relative_to(root).as_posix()
+                    if public and arc in PRIVATE_COLUMNS:
+                        import pandas as pd
+                        df = pd.read_csv(f, low_memory=False)
+                        for c in PRIVATE_COLUMNS[arc]:
+                            if c in df.columns:
+                                df[c] = None
+                        data = df.to_csv(index=False).encode()
+                        info = tarfile.TarInfo(arc)
+                        info.size, info.mtime = len(data), int(f.stat().st_mtime)
+                        tar.addfile(info, io.BytesIO(data))
+                    else:
+                        tar.add(f, arcname=arc)
     return buf.getvalue()
 
 

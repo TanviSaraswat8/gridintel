@@ -30,6 +30,12 @@ jobs:
         run: python -m compileall -q backend ml scripts
       - name: Web modules parse check
         run: for f in frontend/assets/js/*.js frontend/assets/js/app/*.js; do node --check "$f"; done
+      - name: Web production build (config.js from API_URL) + no localhost in shipped web/mobile code
+        run: |
+          cd frontend && API_URL=https://example.invalid node build-config.mjs && grep -q example.invalid config.js && git checkout config.js && cd ..
+          ! grep -rnE "https?://(localhost|127\.0\.0\.1)" frontend/*.html frontend/assets/js mobile/src mobile/App.js
+      - name: Translation tables are generated from i18n/translations.py
+        run: python scripts/build_i18n.py --check
 
   test:
     needs: [lint, typecheck]
@@ -82,8 +88,24 @@ jobs:
       - uses: docker/login-action@v3
         if: github.ref == 'refs/heads/main'
         with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      - name: Build production image
+        uses: docker/build-push-action@v6
+        with: { context: ., load: true, tags: "gridintel:ci", cache-from: type=gha, cache-to: "type=gha,mode=max" }
+      - name: Smoke-test the production image (public demo mode, no private data)
+        run: |
+          ! docker run --rm --entrypoint sh gridintel:ci -c 'find / -xdev \( -iname "*.xlsx" -o -iname "*.xls" \) 2>/dev/null' | grep .
+          docker run -d --name gi -p 8000:8000 -e APP_ENV=production -e JWT_SECRET=ci-only-secret-0123456789abcdef0123 \
+            -e TRAIN_ON_START=false -e DEMO_USERS_ENABLED=false -e DATA_MODE=public gridintel:ci
+          for i in $(seq 1 60); do curl -fsS localhost:8000/health && break; sleep 2; done
+          curl -fsS localhost:8000/health | grep -q '"PUBLIC DEMO MODE"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8000/ready)" = 503      # awaiting the artifact bundle
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8000/api/v1/substations)" = 401
+          for p in / /app /mobile/ /assets/js/i18n.js; do curl -fsS -o /dev/null "localhost:8000$p"; done
+          curl -fsSI localhost:8000/app | grep -qi content-security-policy
+          docker logs gi | tail -20; docker rm -f gi
       - uses: docker/build-push-action@v6
         with:
           context: .
+          cache-from: type=gha
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ env.IMAGE }}:latest,${{ env.IMAGE }}:${{ github.sha }}

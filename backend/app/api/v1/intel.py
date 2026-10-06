@@ -212,7 +212,10 @@ def explorer(substation: str, parameter: str, date: str | None = None, hour: int
              page: int = Query(1, ge=1), size: int = Query(100, ge=1, le=500)):
     rows = _explorer_rows(substation, parameter, date, hour)
     return {"total": len(rows), "page": page, "size": size, "items": rows[(page - 1) * size: page * size],
-            "unit": store().unit(parameter), "note": "raw = cell text in the Excel log; cleaned = parsed numeric value (missing kept as null)."}
+            "unit": store().unit(parameter), "data_mode": get_settings().data_mode_label,
+            "note": ("raw = cell text in the Excel log; cleaned = parsed numeric value (missing kept as null)."
+                     if get_settings().data_mode == "local" else
+                     "PUBLIC DEMO MODE: verbatim Excel cell text is kept local; cleaned = parsed numeric value (missing kept as null).")}
 
 
 def _explorer_rows(sid: str, p: str, date: str | None, hour: int | None) -> list[dict]:
@@ -221,7 +224,7 @@ def _explorer_rows(sid: str, p: str, date: str | None, hour: int | None) -> list
     v = st.values[sid]
     if p not in v.columns:
         raise HTTPException(422, f"Parameter not logged at {sid}")
-    raw = _raw_cells(st.sub(sid)["sheet"], p)
+    raw = _raw_cells(st.sub(sid)["sheet"], p) if get_settings().data_mode == "local" else {}
     s = v[p].astype(float)
     day = v["log_date"]
     rmean = s.groupby(day).transform(lambda x: x.rolling(3, min_periods=1).mean())
@@ -283,7 +286,8 @@ def models():
     comp = {k: {"mean": f(sc[f"{k}_score"].mean(), 1), "p90": f(sc[f"{k}_score"].quantile(.9), 1)} for k in ("iforest", "autoencoder", "temporal_ae")}
     return {"ensemble": {k: v for k, v in st.registry["ensemble"].items() if k != "artifacts"},
             "artifacts": st.registry["ensemble"]["artifacts"], "models": st.registry["models"],
-            "raw_files": st.registry.get("raw_files", []),
+            "raw_files": st.registry.get("raw_files", []) if get_settings().data_mode == "local" else [],
+            "data_mode": get_settings().data_mode_label,
             "inference_latency_ms": {"p50": f(np.percentile(lat, 50), 2) if lat else None,
                                      "p95": f(np.percentile(lat, 95), 2) if lat else None, "samples": len(lat)},
             "anomaly_distribution": dict(zip(["counts", "edges"], [x.tolist() for x in np.histogram(sc.anomaly_score, bins=10, range=(0, 100))])),

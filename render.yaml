@@ -2,9 +2,12 @@
 # Dashboard → New → Blueprint → select this repo.
 #
 # Free plan notes: the service sleeps after ~15 min idle (first request wakes it in ~1 min) and has no disk.
-# Trained models are NOT in the image or the repo: after the first deploy an ADMIN uploads the private bundle
-#   python scripts/package_artifacts.py --upload https://<service>.onrender.com --username <ADMIN_USERNAME>
-# The API stores it in PostgreSQL and restores it on every start. Training is disabled on the server
+# PUBLIC DEMO MODE. Trained models are NOT in the image or the repo: after the first deploy, sign in as the ADMIN
+# and upload dist/gridintel-artifacts.tar.gz (made locally by `python scripts/package_artifacts.py`; verbatim Excel
+# cells are stripped, the workbooks are never included). The API stores it in PostgreSQL and restores it on every start.
+# Redis is not provisioned: one instance, so the in-memory cache is sufficient (set REDIS_URL to use one).
+# CORS defaults to the service's own URL (RENDER_EXTERNAL_URL); the web app and /mobile are served from that origin.
+# Training is disabled on the server
 # (TRAIN_ON_START=false): it needs ~1 GB RAM.
 services:
   - type: web
@@ -24,7 +27,7 @@ services:
       - { key: DEMO_USERS_ENABLED, value: "false" }
       - { key: ADMIN_USERNAME, sync: false }       # set in the dashboard
       - { key: ADMIN_PASSWORD, sync: false }       # set in the dashboard (never commit)
-      - { key: CORS_ORIGINS, sync: false }         # https://<service>.onrender.com
+      - { key: DATA_MODE, value: public }
       - key: DATABASE_URL
         fromDatabase: { name: gridintel-db, property: connectionString }
 databases:

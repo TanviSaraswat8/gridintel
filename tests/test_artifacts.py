@@ -55,6 +55,26 @@ def test_upload_invalid_bundle_is_422_and_store_untouched(client, admin, op):
     assert client.get("/api/v1/substations", headers=op).status_code == 200
 
 
+def _member(blob: bytes, name: str) -> bytes:
+    with tarfile.open(fileobj=io.BytesIO(blob), mode="r:gz") as t:
+        return t.extractfile(name).read()
+
+
+def test_public_bundle_strips_verbatim_cells(built):
+    import pandas as pd
+    pub = pd.read_csv(io.BytesIO(_member(artifacts.pack(built), "data/processed/scada_long.csv")), low_memory=False)
+    priv = pd.read_csv(io.BytesIO(_member(artifacts.pack(built, public=False), "data/processed/scada_long.csv")), low_memory=False)
+    assert pub["raw_value"].isna().all() and priv["raw_value"].notna().any()
+    assert pub["value"].equals(priv["value"])           # parsed values (used by the models) are unchanged
+    with tarfile.open(fileobj=io.BytesIO(artifacts.pack(built)), mode="r:gz") as t:
+        assert not [n for n in t.getnames() if n.lower().endswith((".xlsx", ".xls")) or n.startswith("data/raw")]
+
+
+def test_health_reports_data_mode(client):
+    h = client.get("/health").json()
+    assert h["data_mode"] in ("LOCAL REAL-DATA MODE", "PUBLIC DEMO MODE")
+
+
 def test_upload_real_bundle_roundtrip(client, admin, built):
     blob = artifacts.pack(built)
     r = client.post("/api/v1/admin/artifacts", content=blob, headers={**admin, "Content-Type": "application/gzip"})
