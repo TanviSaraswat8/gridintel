@@ -9,7 +9,7 @@ GridIntel turns historical and (future) streaming SCADA data from electrical sub
 ---
 
 ## Contents
-[Overview](#overview) · [Architecture](#architecture) · [Features](#features) · [Dataset methodology](#dataset-methodology) · [ML methodology](#ml-methodology) · [Installation](#installation) · [Development](#development) · [Production deployment](#production-deployment) · [Environment variables](#environment-variables) · [API](#api) · [Mobile app](#mobile-app) · [Model training](#model-training) · [Evaluation](#evaluation) · [Security](#security) · [Limitations](#limitations)
+[Overview](#overview) · [Architecture](#architecture) · [Features](#features) · [Dataset methodology](#dataset-methodology) · [ML methodology](#ml-methodology) · [Installation](#installation) · [Development](#development) · [Production deployment](#production-deployment) · [Environment variables](#environment-variables) · [API](#api) · [Mobile app](#mobile-app) · [Languages](#languages) · [Model training](#model-training) · [Evaluation](#evaluation) · [Security](#security) · [Limitations](#limitations)
 
 ## Overview
 
@@ -81,7 +81,18 @@ Details: [docs/architecture.md](docs/architecture.md).
 - **Analytics** — date range, substation and parameter filters; trends, risk distribution, anomaly timeline, equipment loading vs rating, contributing-signal ranking, correlation matrix.
 - **AI Model Lab** — model versions, configs, artifacts with SHA-256, inference latency, unsupervised validation, reviewed events, public benchmarks.
 - **Data Explorer** — raw cell vs cleaned value, rolling statistics, anomaly score, paginated, CSV export (audit-logged).
+- **Languages** — English, हिन्दी (Hindi), हरियाणवी (Haryanvi) and ਪੰਜਾਬੀ (Punjabi) across the landing page, command center and field app, including the AI investigation text (see [Languages](#languages)).
 - Command palette (Ctrl/⌘ K), keyboard shortcuts (1–8 pages, Space play/pause, N next), toasts, skeletons, confirmation dialogs, responsive layouts.
+
+## Languages
+
+The switcher sits in the top bar, on the sign-in screen and in the landing-page header (field app: sign-in and Profile). The choice is remembered per browser.
+
+- One table, `i18n/translations.py`, holds every string in four languages. English text is the lookup key, so pages are written in English and translated as they render.
+- The API sends each explanation sentence with a template key and display-ready values (`"i18n": {"what": ["rule.R-V1.msg", {...}]}`), and the clients rebuild it in the viewer's language. Engineering rules, observed-signal sentences and the "why / expected / what to check" text are all covered.
+- Source data stays as written: substation names, HVPNL parameter labels, units and numbers are not translated.
+- After editing the table, run `python scripts/build_i18n.py` to regenerate `frontend/assets/js/i18n-strings.js` and `mobile/src/strings.js`. The test suite fails if they are stale or if any template is missing a placeholder.
+- The Haryanvi and Punjabi wording should be reviewed by a native-speaking engineer before field use.
 
 ## Dataset methodology
 

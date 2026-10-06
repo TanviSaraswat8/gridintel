@@ -40,23 +40,34 @@ def unusualness(z: float | None, share: float) -> str:
 
 
 def observed(store: Store, sid: str, ts: str, sig: dict) -> str:
+    return observed_i18n(store, sid, ts, sig)[0]
+
+
+def observed_i18n(store: Store, sid: str, ts: str, sig: dict) -> tuple[str, list]:
+    """English sentence plus [template key, args] so clients can render it in other languages."""
     kind, unit = sig["kind"], sig.get("unit") or ""
     v, med, p10, p90 = sig["value"], sig["baseline_median"], sig["baseline_p10"], sig["baseline_p90"]
     fm = store.bundle_for(sid, ts).iforest.feature_meta.get(sig["feature"], {})
+    lab = sig.get("label", "")
     if kind == "thermal_residual":
         lp, base = fm.get("load_parameter"), fm.get("base_parameter")
-        return (f"{short_name(base)} reads {_fmt(store.val(sid, ts, base), '°C')}, {_fmt(abs(v), '°C')} "
-                f"{'above' if v > 0 else 'below'} the level expected for the current loading of {short_name(lp)} "
-                f"({_fmt(store.val(sid, ts, lp), store.unit(lp))}).")
+        a = {"p": short_name(base), "v": _fmt(store.val(sid, ts, base), "°C"), "d": _fmt(abs(v), "°C"),
+             "lp": short_name(lp), "lv": _fmt(store.val(sid, ts, lp), store.unit(lp))}
+        key = "obs.thermal_above" if v > 0 else "obs.thermal_below"
+        return (f"{a['p']} reads {a['v']}, {a['d']} {'above' if v > 0 else 'below'} the level expected for the current loading of "
+                f"{a['lp']} ({a['lv']})."), [key, a]
+    a = {"label": lab, "v": _fmt(v, unit), "p10": _fmt(p10, unit), "p90": _fmt(p90, unit), "med": _fmt(med, unit)}
     if kind in ("rate_of_change", "state_change"):
-        return f"{sig['label']}: {_fmt(v, unit)} this hour (typical {_fmt(p10, unit)} to {_fmt(p90, unit)})."
+        return f"{lab}: {a['v']} this hour (typical {a['p10']} to {a['p90']}).", ["obs.change", a]
     if kind in ("deviation", "rolling_std", "rolling_mean", "rolling_max", "rolling_min", "imbalance", "stress"):
-        return f"{sig['label']}: {_fmt(v, unit)} (typical {_fmt(p10, unit)} to {_fmt(p90, unit)})."
+        return f"{lab}: {a['v']} (typical {a['p10']} to {a['p90']}).", ["obs.deviation", a]
     if kind == "equipment_state":
-        return f"{sig['label']}: {_fmt(v)} (typical {_fmt(med)})."
+        a["v"], a["med"] = _fmt(v), _fmt(med)
+        return f"{lab}: {a['v']} (typical {a['med']}).", ["obs.state", a]
     if v is not None and p10 is not None and p90 is not None and p10 <= v <= p90:
-        return f"{sig['label']} = {_fmt(v, unit)} is inside its usual range but contributes as part of an unusual combination."
-    return f"{sig['label']} = {_fmt(v, unit)} is {sig['direction']} its learned range {_fmt(p10, unit)} – {_fmt(p90, unit)} (median {_fmt(med, unit)})."
+        return f"{lab} = {a['v']} is inside its usual range but contributes as part of an unusual combination.", ["obs.inside", a]
+    key = "obs.below" if sig.get("direction") == "below" else "obs.above"
+    return (f"{lab} = {a['v']} is {sig['direction']} its learned range {a['p10']} – {a['p90']} (median {a['med']})."), [key, a]
 
 
 def build(store: Store, sid: str, ts: str) -> dict:
@@ -78,11 +89,11 @@ def build(store: Store, sid: str, ts: str) -> dict:
                             "contribution_share": 0.0, "direction": "below" if (store.val(sid, ts, p0) or 0) < (col.median() or 0) else "above",
                             "level": "High", "description": rules[0]["title"]}
         if match is None:
-            primary["observed"] = observed(store, sid, ts, primary)
+            primary["observed"], primary["observed_i18n"] = observed_i18n(store, sid, ts, primary)
             primary["unusualness"] = "strong" if rules[0]["severity"] >= 0.6 else "moderate"
             primary["is_primary"] = True
     for x in sigs:
-        x["observed"] = observed(store, sid, ts, x)
+        x["observed"], x["observed_i18n"] = observed_i18n(store, sid, ts, x)
         x["unusualness"] = unusualness(x.get("deviation_z"), x.get("contribution_share", 0))
         x["is_primary"] = primary is not None and x["feature"] == primary.get("feature")
     cat = snap["risk_category"]
@@ -110,8 +121,10 @@ def build(store: Store, sid: str, ts: str) -> dict:
         trend["series"].append({"parameter": p, "name": short_name(p), "unit": store.unit(p),
                                 "values": [store.val(sid, t, p) for t in window], "baseline_median": f(store.values[sid][p].median())})
     investigate = [r["investigate"] for r in rules]
+    investigate_i18n = [r.get("i18n", {}).get("check") for r in rules]
     if not investigate and primary:
         investigate = [f"Review {short_name(primary['base_parameter'])} against operator remarks and adjacent equipment for this hour."]
+        investigate_i18n = [["inv.review", {"p": short_name(primary["base_parameter"])}]]
     tid = store.meta(primary["base_parameter"]).get("transformer") if primary and primary["base_parameter"] in store.param_meta else None
     return {
         "available": True, "substation": snap["substation"], "timestamp": ts, "log_date": snap["log_date"], "hour": snap["hour"],
@@ -124,6 +137,18 @@ def build(store: Store, sid: str, ts: str) -> dict:
                 f"temporal AE {snap['components']['temporal_ae']:.0f}); engineering rules {snap['rule_score']:.0f}/100."),
         "how_unusual": (primary["unusualness"] if primary else "mild"),
         "investigate": investigate,
+        # i18n: [template key, args] pairs; clients rebuild the sentences above in the viewer's language
+        "i18n": {
+            "message": ["msg.detected_at", {"name": s["name"]}] if cat in ALERT_CATEGORIES else [HEADLINE[cat], {}],
+            "what": (rules[0].get("i18n", {}).get("msg") if rules else (primary.get("observed_i18n") if primary else [HEADLINE[cat], {}])),
+            "why": ["why.summary", {"risk": f"{snap['risk_score']:.0f}", "cat": cat, "anomaly": f"{snap['anomaly_score']:.0f}",
+                                    "if": f"{snap['components']['iforest']:.0f}", "ae": f"{snap['components']['autoencoder']:.0f}",
+                                    "tw": f"{snap['components']['temporal_ae']:.0f}", "rules": f"{snap['rule_score']:.0f}"}],
+            "expected": (["exp.baseline", {"med": _fmt(primary["baseline_median"], primary.get("unit", "")),
+                                           "p10": _fmt(primary["baseline_p10"], primary.get("unit", "")),
+                                           "p90": _fmt(primary["baseline_p90"], primary.get("unit", ""))}] if primary else None),
+            "investigate": investigate_i18n,
+        },
         "anomaly_score": snap["anomaly_score"], "risk_score": snap["risk_score"], "confidence": snap["confidence"],
         "risk_category": cat, "components": snap["components"], "rule_score": snap["rule_score"], "rules": rules,
         "model_key": snap["model_key"], "evaluation": snap["evaluation"],

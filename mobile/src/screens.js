@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, RefreshControl, ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, TextInput, View } from "react-native";
+import { Text, tr } from "./i18n";
 import { api, getBase, setBase, setToken } from "./api";
-import { Badge, Btn, C, Columns, ErrorBox, Loading, MONO, Panel, Tile, fmt, hourFmt, riskColor, riskFill, s, tsFmt } from "./ui";
+import { Badge, Btn, C, Columns, ErrorBox, LangPicker, Loading, MONO, Panel, Tile, fmt, hourFmt, riskColor, riskFill, s, tsFmt } from "./ui";
 
 const DISCLAIMER = "Prototype AI risk classification — not certified protection thresholds. Risk scores and anomaly alerts are model-generated decision-support indicators, not certified protection or fault-diagnosis outputs.";
 
@@ -83,8 +84,9 @@ export function LoginScreen({ onLogin }) {
   const input = { borderWidth: 1, borderColor: C.line2, backgroundColor: C.bg2, color: C.text, padding: 12, fontFamily: MONO, marginTop: 4, marginBottom: 12, borderRadius: 6 };
   return (
     <ScrollView contentContainerStyle={{ padding: 22, paddingTop: 70 }} keyboardShouldPersistTaps="handled">
-      <Text style={[s.h1, { fontSize: 24, letterSpacing: 5 }]}>GRID<Text style={{ color: C.accent }}>INTEL</Text></Text>
+      <Text noTranslate style={[s.h1, { fontSize: 24, letterSpacing: 5 }]}>GRID<Text style={{ color: C.accent }}>INTEL</Text></Text>
       <Text style={[s.dim, { marginTop: 8, marginBottom: 28 }]}>Field engineering app · AI grid intelligence for substation monitoring</Text>
+      <LangPicker />
       <Panel title="SIGN IN">
         <Text style={s.kvK}>API SERVER</Text>
         <TextInput style={input} value={server} onChangeText={setServer} autoCapitalize="none" autoCorrect={false} placeholder="http://192.168.x.x:8000" placeholderTextColor={C.faint} />
@@ -291,23 +293,23 @@ export function InvestigationScreen({ params }) {
               <Text style={{ color: C.accent, fontFamily: MONO, fontWeight: "700", letterSpacing: 2, fontSize: 11 }}>● AI INVESTIGATION</Text>
               <Text style={{ color: col, fontFamily: MONO, fontWeight: "700", letterSpacing: 2, marginTop: 8 }}>{data.title}</Text>
               <Text style={[s.h1, { marginTop: 4 }]}>{data.substation.name}</Text>
-              <Text style={[s.dim, { marginTop: 4 }]}>"{data.headline}"</Text>
+              <Text style={[s.dim, { marginTop: 4 }]}>“{tr(data.headline)}”</Text>
               <View style={[s.row, { justifyContent: "space-between", marginTop: 12 }]}>
                 <View><Text style={s.kvK}>RISK</Text><Text style={{ color: col, fontFamily: MONO, fontWeight: "700", fontSize: 30 }}>{fmt(data.risk_score, 0)}<Text style={{ fontSize: 13, color: C.faint }}>/100</Text></Text></View>
                 <View><Text style={s.kvK}>CONFIDENCE</Text><Text style={{ color: C.text, fontFamily: MONO, fontWeight: "700", fontSize: 30 }}>{fmt(data.confidence, 0)}%</Text></View>
               </View>
               <Text style={[s.faint, { marginTop: 4 }]}>{tsFmt(data.timestamp)} · {data.evaluation} · {data.model_key}</Text>
             </Panel>
-            <Panel title="WHAT HAPPENED"><Text style={s.kvV}>{data.what}</Text>
+            <Panel title="WHAT HAPPENED"><Text style={s.kvV}>{tr(data.what, data.i18n?.what)}</Text>
               <Text style={s.kvK}>PARAMETER</Text><Text style={s.kvV}>{p.base_parameter}</Text>
               <Text style={s.kvK}>CURRENT VALUE</Text><Text style={[s.kvV, { fontFamily: MONO, fontSize: 18 }]}>{fmt(data.current_value, 2)} {p.unit}</Text>
-              <Text style={s.kvK}>EXPECTED</Text><Text style={s.kvV}>{data.expected_behaviour}</Text></Panel>
-            <Panel title="WHY IT WAS FLAGGED"><Text style={s.kvV}>{data.why}</Text><Text style={s.kvK}>HOW UNUSUAL</Text><Text style={s.kvV}>{data.how_unusual}</Text></Panel>
+              <Text style={s.kvK}>EXPECTED</Text><Text style={s.kvV}>{tr(data.expected_behaviour, data.i18n?.expected)}</Text></Panel>
+            <Panel title="WHY IT WAS FLAGGED"><Text style={s.kvV}>{tr(data.why, data.i18n?.why)}</Text><Text style={s.kvK}>HOW UNUSUAL</Text><Text style={s.kvV}>{data.how_unusual}</Text></Panel>
             <Panel title="CONTRIBUTING SIGNALS" hint="not confirmed causes">
               {data.rules.map((r, i) => (
                 <View key={"r" + i} style={{ paddingVertical: 8, borderBottomWidth: 1, borderColor: C.line }}>
                   <Text style={{ color: C.WARNING, fontFamily: MONO, fontSize: 10, fontWeight: "700" }}>ENGINEERING RULE {r.rule}</Text>
-                  <Text style={{ color: C.text, fontWeight: "700", marginTop: 2 }}>{r.title}</Text><Text style={[s.dim, { fontSize: 12 }]}>{r.message}</Text>
+                  <Text style={{ color: C.text, fontWeight: "700", marginTop: 2 }}>{r.title}</Text><Text style={[s.dim, { fontSize: 12 }]}>{tr(r.message, r.i18n?.msg)}</Text>
                 </View>))}
               {data.contributing_signals.slice(0, 5).map((x, i) => (
                 <View key={i} style={{ paddingVertical: 8, borderBottomWidth: 1, borderColor: C.line }}>
@@ -316,13 +318,13 @@ export function InvestigationScreen({ params }) {
                     <Text style={{ color: C.text, fontFamily: MONO, fontSize: 12 }}>{fmt(x.value, 2)} {x.unit}</Text>
                   </View>
                   <Text style={{ color: C.text, fontWeight: "700", marginTop: 2 }}>{x.label}</Text>
-                  <Text style={[s.dim, { fontSize: 12 }]}>{x.observed}</Text>
+                  <Text style={[s.dim, { fontSize: 12 }]}>{tr(x.observed, x.observed_i18n)}</Text>
                   <View style={{ height: 6, backgroundColor: C.bg2, marginTop: 5, borderRadius: 3 }}><View style={{ height: 6, borderRadius: 3, width: `${(x.contribution_share / maxS) * 100}%`, backgroundColor: C.accent }} /></View>
                 </View>))}
             </Panel>
             {ps ? <Panel title="TREND" hint={`${ps.name} · dashed = baseline`}><Columns values={ps.values} labels={t.timestamps.map(hourFmt)} baseline={ps.baseline_median} unit={ps.unit} /></Panel> : null}
             <Panel title="RISK AROUND THE EVENT"><Columns values={t.risk} labels={t.timestamps.map(hourFmt)} colorFn={riskFill} /></Panel>
-            <Panel title="WHAT TO INVESTIGATE">{data.investigate.map((x, i) => <Text key={i} style={[s.kvV, { marginBottom: 6 }]}>• {x}</Text>)}</Panel>
+            <Panel title="WHAT TO INVESTIGATE">{data.investigate.map((x, i) => <Text key={i} style={[s.kvV, { marginBottom: 6 }]}>• {tr(x, data.i18n?.investigate?.[i])}</Text>)}</Panel>
             <Panel title="EVIDENCE" hint="source measurements">
               {data.evidence.slice(0, 8).map((e, i) => (
                 <View key={i} style={[s.row, { justifyContent: "space-between", paddingVertical: 5, borderBottomWidth: 1, borderColor: C.line }]}>
@@ -385,6 +387,7 @@ export function ProfileScreen({ user, onLogout }) {
     <Guard error={error} data={data} refresh={refresh}>
       {data ? (
         <Scroll>
+          <Panel title="Language"><LangPicker /></Panel>
           <Panel title="PROFILE"><Text style={s.kvK}>USER</Text><Text style={s.kvV}>{user?.display_name || user?.username}</Text>
             <Text style={s.kvK}>ROLE</Text><Text style={s.kvV}>{user?.role}</Text><Text style={s.kvK}>API</Text><Text style={s.kvV}>{getBase()}</Text></Panel>
           <Panel title="SYSTEM">

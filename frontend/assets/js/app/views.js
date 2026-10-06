@@ -5,6 +5,9 @@ import { S, api, badge, bars, closeDrawer, cls, color, download, drawer, emptySt
 const $v = () => document.getElementById("view");
 const sub = (id) => S.subs.find((x) => x.id === id) || {};
 const goInv = (sid, t) => (location.hash = `#/investigate/${sid}/${t}`);
+// render an API sentence in the viewer's language from its [template key, args] pair (falls back to English)
+const say = (en, pair) => (window.GI18N ? window.GI18N.tr(en || "", pair) : en || "");
+const sayRule = (r, f) => say(r[f === "msg" ? "message" : "investigate"], r.i18n && r.i18n[f]);
 
 // ======================================================================== COMMAND CENTER
 export async function command() {
@@ -209,7 +212,7 @@ function equipDrawer(n, t) {
     <div class="tiny dim" style="margin:4px 0 14px">${esc(n.kind.toUpperCase())} · ${esc(t.substation.name)} · ${ts(t.timestamp)}</div>
     <div class="panel"><h3>Current state</h3><table><tbody>${n.values.map((v) => `<tr><td>${esc(v.name)}</td><td class="n">${v.value == null ? (v.state || "—") : fmt(v.value, 2) + " " + esc(v.unit)}</td></tr>`).join("")}</tbody></table></div>
     <div class="sp"></div>
-    <div class="panel"><h3>Anomaly signals</h3>${n.signals.length || n.rules.length ? [...n.rules.map((r) => `<div class="sig"><div class="top"><b>${esc(r.title)}</b><span class="lvl lvl-High">RULE ${esc(r.rule)}</span></div><div class="o">${esc(r.message)}</div></div>`),
+    <div class="panel"><h3>Anomaly signals</h3>${n.signals.length || n.rules.length ? [...n.rules.map((r) => `<div class="sig"><div class="top"><b>${esc(r.title)}</b><span class="lvl lvl-High">RULE ${esc(r.rule)}</span></div><div class="o">${esc(sayRule(r, "msg"))}</div></div>`),
       ...n.signals.map((x) => `<div class="sig"><div class="top"><b>${esc(x.label)}</b><span class="lvl lvl-${x.level}">${x.level.toUpperCase()}</span></div><div class="o">${fmt(x.value, 2)} ${esc(x.unit || "")} · typical ${fmt(x.baseline_p10, 1)}–${fmt(x.baseline_p90, 1)}</div></div>`)].join("") : emptyState("No contributing signals on this equipment.")}</div>
     <div class="sp"></div>
     <div class="panel"><h3>Recent history</h3><div class="chart short"><canvas id="dH"></canvas></div></div>
@@ -244,7 +247,7 @@ export async function investigate(sid, t) {
       <div class="tiny faint mono">${esc(a.risk_category)} · ${fmt(a.risk_score, 0)} · ${a.src === "replay" ? "replay alert" : "history"}</div></div></div>`).join("")}</div></div>
     <div class="grid">
       <div class="panel" style="border-top:2px solid ${col}"><div class="row wrap"><span class="mono tiny" style="color:${col};letter-spacing:.18em">${esc(d.title)}</span><span class="right">${badge(d.risk_category)}</span></div>
-        <h2 style="margin:6px 0 4px;font-size:20px">${esc(d.affected_parameter || "Multiple signals")}</h2><div class="dim">${esc(d.message)}</div>
+        <h2 style="margin:6px 0 4px;font-size:20px">${esc(d.affected_parameter || "Multiple signals")}</h2><div class="dim">${esc(say(d.message, d.i18n?.message))}</div>
         <div class="grid g4" style="margin-top:12px">
           <div class="metric"><div class="k">Current value</div><div class="v">${fmt(d.current_value, 2)}<small>${esc(p.unit || "")}</small></div></div>
           <div class="metric"><div class="k">Baseline median</div><div class="v">${fmt(p.baseline_median, 2)}<small>${esc(p.unit || "")}</small></div></div>
@@ -261,20 +264,20 @@ export async function investigate(sid, t) {
     </div>
     <div class="panel ai-panel glass">
       <div class="ai-head">AI INVESTIGATION</div>
-      <p style="margin:10px 0 6px;font-size:15px">"${esc(d.headline)}"</p>
+      <p style="margin:10px 0 6px;font-size:15px">“<span>${esc(d.headline)}</span>”</p>
       <div class="row" style="align-items:center">${gauge(d.risk_score, d.risk_category)}<div style="flex:1">
         <div class="mono tiny faint">CONFIDENCE</div><div class="mono" style="font-size:26px;font-weight:700">${fmt(d.confidence, 0)}%</div>
         <div class="tiny dim">IF ${fmt(d.components.iforest, 0)} · AE ${fmt(d.components.autoencoder, 0)} · TW-AE ${fmt(d.components.temporal_ae, 0)} · rules ${fmt(d.rule_score, 0)}</div></div></div>
       <div class="qa" style="margin:6px 0 12px">
-        <div><b>What happened</b><p>${esc(d.what)}</p></div>
-        <div><b>Why it was flagged</b><p>${esc(d.why)}</p></div>
-        <div><b>How unusual</b><p>${esc(d.how_unusual)} — ${esc(d.expected_behaviour || "")}</p></div>
-        <div><b>What to investigate</b><p>${d.investigate.map(esc).join("<br/>")}</p></div></div>
+        <div><b>What happened</b><p>${esc(say(d.what, d.i18n?.what))}</p></div>
+        <div><b>Why it was flagged</b><p>${esc(say(d.why, d.i18n?.why))}</p></div>
+        <div><b>How unusual</b><p>${esc(d.how_unusual)} — ${esc(say(d.expected_behaviour, d.i18n?.expected))}</p></div>
+        <div><b>What to investigate</b><p>${d.investigate.map((x, i) => esc(say(x, d.i18n?.investigate?.[i]))).join("<br/>")}</p></div></div>
       <h3 class="ph">Contributing signals <span class="hint">not confirmed causes</span></h3>
-      ${d.rules.map((r) => `<div class="sig"><div class="top"><b>${esc(r.title)}</b><span class="lvl lvl-High">RULE</span></div><div class="o">${esc(r.message)}</div><div class="bar warn"><i style="width:${r.severity * 100}%"></i></div></div>`).join("")}
+      ${d.rules.map((r) => `<div class="sig"><div class="top"><b>${esc(r.title)}</b><span class="lvl lvl-High">RULE</span></div><div class="o">${esc(sayRule(r, "msg"))}</div><div class="bar warn"><i style="width:${r.severity * 100}%"></i></div></div>`).join("")}
       ${d.contributing_signals.slice(0, 6).map((x) => `<div class="sig"><div class="top"><b>${esc(x.label)}${x.is_primary ? ' <span class="badge c-WARNING" style="margin-left:4px">PRIMARY</span>' : ""}</b><span class="lvl lvl-${x.level}">${x.level.toUpperCase()}</span></div>
-        <div class="o">${esc(x.observed)}</div><div class="bar"><i style="width:${(x.contribution_share / maxS) * 100}%"></i></div></div>`).join("")}
-      <div class="sp"></div><div class="note">${esc(d.method)}<br/><br/>${esc(d.risk_note)} ${esc(d.data_note)}</div>
+        <div class="o">${esc(say(x.observed, x.observed_i18n))}</div><div class="bar"><i style="width:${(x.contribution_share / maxS) * 100}%"></i></div></div>`).join("")}
+      <div class="sp"></div><div class="note"><span>${esc(d.method)}</span><br/><br/><span>${esc(d.risk_note)}</span> <span>${esc(d.data_note)}</span></div>
     </div>
   </div>`;
   bind();

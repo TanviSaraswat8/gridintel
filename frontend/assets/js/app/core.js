@@ -88,24 +88,25 @@ const CH = {};
 export function destroyCharts() { for (const k in CH) { CH[k].destroy(); delete CH[k]; } }
 if (window.Chart) {
   Object.assign(Chart.defaults, { color: "#93a1b2", borderColor: "rgba(130,170,210,.08)", animation: { duration: 250 } });
-  Chart.defaults.font.family = "Inter, Segoe UI, system-ui, sans-serif"; Chart.defaults.font.size = 11;
+  Chart.defaults.font.family = "Inter, Noto Sans Devanagari, Noto Sans Gurmukhi, Segoe UI, system-ui, sans-serif"; Chart.defaults.font.size = 11;
   Chart.defaults.plugins.legend.labels.boxWidth = 10; Chart.defaults.plugins.legend.labels.boxHeight = 2;
   Chart.defaults.plugins.tooltip.backgroundColor = "#0b1016"; Chart.defaults.plugins.tooltip.borderColor = "rgba(130,170,210,.25)"; Chart.defaults.plugins.tooltip.borderWidth = 1;
 }
 const focusLine = { id: "focusLine", afterDatasetsDraw(c, _a, o) { if (o.index == null) return; const x = c.scales.x.getPixelForValue(o.index); const { top, bottom } = c.chartArea;
   const g = c.ctx; g.save(); g.strokeStyle = "rgba(56,200,232,.7)"; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(x, top); g.lineTo(x, bottom); g.stroke(); g.restore(); } };
 
+const P = (x) => (window.GI18N && typeof x === "string" ? window.GI18N.phrase(x) : x); // chart text lives in canvas, outside the DOM translator
 export function line(id, labels, sets, o = {}) {
   const el = document.getElementById(id); if (!el) return;
   CH[id] && CH[id].destroy();
   CH[id] = new Chart(el, { type: "line", plugins: [focusLine],
     data: { labels, datasets: sets.map((d, i) => ({ borderColor: d.color || SERIES[i % SERIES.length], backgroundColor: d.fill || "transparent", borderWidth: d.w || 1.7,
-      pointRadius: d.points ?? (labels.length < 30 ? 2 : 0), pointHoverRadius: 4, tension: .25, spanGaps: true, fill: !!d.fill, borderDash: d.dash || [], yAxisID: d.axis || "y", ...d })) },
+      pointRadius: d.points ?? (labels.length < 30 ? 2 : 0), pointHoverRadius: 4, tension: .25, spanGaps: true, fill: !!d.fill, borderDash: d.dash || [], yAxisID: d.axis || "y", ...d, label: P(d.label) })) },
     options: { maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
       plugins: { legend: { display: sets.length > 1, position: "bottom" }, focusLine: { index: o.focus } },
       scales: { x: { ticks: { maxRotation: 0, autoSkipPadding: 16 }, grid: { color: "rgba(130,170,210,.05)" } },
-        y: { grid: { color: "rgba(130,170,210,.06)" }, title: { display: !!o.y, text: o.y }, min: o.min, max: o.max },
-        ...(o.y2 ? { y2: { position: "right", min: 0, max: 100, grid: { display: false }, title: { display: true, text: o.y2 } } } : {}) } } });
+        y: { grid: { color: "rgba(130,170,210,.06)" }, title: { display: !!o.y, text: P(o.y) }, min: o.min, max: o.max },
+        ...(o.y2 ? { y2: { position: "right", min: 0, max: 100, grid: { display: false }, title: { display: true, text: P(o.y2) } } } : {}) } } });
   return CH[id];
 }
 export function bars(id, labels, data, colors, o = {}) {
@@ -113,7 +114,7 @@ export function bars(id, labels, data, colors, o = {}) {
   CH[id] && CH[id].destroy();
   CH[id] = new Chart(el, { type: "bar", data: { labels, datasets: [{ data, backgroundColor: colors || "#38c8e8", borderRadius: 3, barPercentage: .85, categoryPercentage: .9 }] },
     options: { maintainAspectRatio: false, indexAxis: o.h ? "y" : "x", plugins: { legend: { display: false } },
-      scales: { x: { grid: { color: "rgba(130,170,210,.05)" }, title: { display: !!o.x, text: o.x } }, y: { grid: { color: "rgba(130,170,210,.06)" }, ticks: { autoSkip: false } } } } });
+      scales: { x: { grid: { color: "rgba(130,170,210,.05)" }, title: { display: !!o.x, text: P(o.x) } }, y: { grid: { color: "rgba(130,170,210,.06)" }, ticks: { autoSkip: false } } } } });
 }
 export const riskSet = (vals, label = "AI risk") => ({ label, data: vals, axis: "y2", color: "#e4eaf1", w: 1.4,
   segment: { borderColor: (c) => riskColorVal(c.p1.parsed.y) }, pointBackgroundColor: vals.map(riskColorVal), pointRadius: vals.map((v) => (v > 55 ? 3.5 : 1.2)) });

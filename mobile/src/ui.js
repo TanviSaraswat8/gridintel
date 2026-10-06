@@ -1,6 +1,7 @@
 // Theme + shared components (dark industrial operator UI).
 import React from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
+import { LANGS, Text, setLang, useLang } from "./i18n";
 
 export const C = {
   bg: "#090c11", bg2: "#0c1117", panel: "#121922", panel2: "#18212c", line: "#1d2834", line2: "#2a3a4c",
@@ -24,6 +25,21 @@ export const tsFmt = (t0) => {
   return `${t.slice(8, 10)} ${m[+t.slice(5, 7) - 1]} ${t.slice(0, 4)}  ${hh}`;
 };
 export const hourFmt = (t) => (t ? shift24(t)[1] : "");
+
+// Language switcher: chips for English / हिन्दी / हरियाणवी / ਪੰਜਾਬੀ (App re-mounts on change)
+export function LangPicker() {
+  const cur = useLang();
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 14 }} accessibilityRole="radiogroup">
+      {LANGS.map((l) => (
+        <Pressable key={l.code} onPress={() => setLang(l.code)} accessibilityRole="radio" accessibilityState={{ selected: cur === l.code }}
+          style={{ paddingVertical: 7, paddingHorizontal: 12, borderRadius: 16, borderWidth: 1, borderColor: cur === l.code ? C.accent : C.line2,
+            backgroundColor: cur === l.code ? C.accent + "22" : C.bg2 }}>
+          <Text noTranslate style={{ color: cur === l.code ? C.accent : C.dim, fontWeight: "600", fontSize: 13 }}>{l.name}</Text>
+        </Pressable>))}
+    </View>
+  );
+}
 
 export function Badge({ cat, small }) {
   const c = riskColor(cat);

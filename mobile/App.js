@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, BackHandler, Pressable, StatusBar, Text, View } from "react-native";
+import { Animated, BackHandler, Pressable, StatusBar, View } from "react-native";
+import { Text, useLang } from "./src/i18n";
 import { api, setOnUnauthorized, setToken } from "./src/api";
 import {
   AlertsScreen, AnalyticsScreen, GridScreen, HomeScreen, InvestigationScreen, LoginScreen, ProfileScreen, ScadaScreen, SubstationScreen,
@@ -20,7 +21,7 @@ function Splash({ onDone }) {
   return (
     <View style={{ flex: 1, backgroundColor: C.bg, alignItems: "center", justifyContent: "center" }}>
       <Animated.View style={{ opacity: o, alignItems: "center" }}>
-        <Text style={{ color: C.text, fontFamily: MONO, fontSize: 26, fontWeight: "700", letterSpacing: 6 }}>GRID<Text style={{ color: C.accent }}>INTEL</Text></Text>
+        <Text noTranslate style={{ color: C.text, fontFamily: MONO, fontSize: 26, fontWeight: "700", letterSpacing: 6 }}>GRID<Text style={{ color: C.accent }}>INTEL</Text></Text>
         <Text style={{ color: C.dim, marginTop: 10 }}>AI grid intelligence · field engineering</Text>
         <Text style={{ color: C.faint, marginTop: 30, fontSize: 11 }}>Decision support · not a certified protection system</Text>
       </Animated.View>
@@ -29,6 +30,7 @@ function Splash({ onDone }) {
 }
 
 export default function App() {
+  const lang = useLang(); // re-mount the visible tree when the language changes
   const [splash, setSplash] = useState(true);
   const [user, setUser] = useState(null);
   const [stack, setStack] = useState([{ name: "home", params: {} }]);
@@ -78,7 +80,7 @@ export default function App() {
   }, [user]);
 
   if (splash) return <><StatusBar barStyle="light-content" backgroundColor={C.bg} /><Splash onDone={() => setSplash(false)} /></>;
-  if (!user) return <View style={{ flex: 1, backgroundColor: C.bg }}><StatusBar barStyle="light-content" backgroundColor={C.bg} /><LoginScreen onLogin={setUser} /></View>;
+  if (!user) return <View key={lang} style={{ flex: 1, backgroundColor: C.bg }}><StatusBar barStyle="light-content" backgroundColor={C.bg} /><LoginScreen onLogin={setUser} /></View>;
 
   const common = { tick, sid, setSid, nav, status, user, params: top.params };
   const screen = {
@@ -89,12 +91,12 @@ export default function App() {
   const activeTab = stack[0].name;
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.bg }}>
+    <View key={lang} style={{ flex: 1, backgroundColor: C.bg }}>
       <StatusBar barStyle="light-content" backgroundColor={C.bg} />
       <View style={{ paddingTop: 38, paddingHorizontal: 14, paddingBottom: 10, flexDirection: "row", alignItems: "center", backgroundColor: "#0b1016", borderBottomWidth: 1, borderColor: C.line }}>
         {stack.length > 1 ? <Pressable onPress={back} hitSlop={12} style={{ marginRight: 12 }}><Text style={{ color: C.accent, fontSize: 24 }}>‹</Text></Pressable> : null}
         <View style={{ flex: 1 }}>
-          <Text style={{ color: C.text, fontFamily: MONO, fontWeight: "700", letterSpacing: 3, fontSize: 13 }}>GRID<Text style={{ color: C.accent }}>INTEL</Text></Text>
+          <Text noTranslate style={{ color: C.text, fontFamily: MONO, fontWeight: "700", letterSpacing: 3, fontSize: 13 }}>GRID<Text style={{ color: C.accent }}>INTEL</Text></Text>
           <Text style={{ color: C.dim, fontSize: 11 }}>{TITLES[top.name]}</Text>
         </View>
         <Pressable onPress={() => nav("profile")} hitSlop={10} style={{ borderWidth: 1, borderColor: C.line2, borderRadius: 14, width: 28, height: 28, alignItems: "center", justifyContent: "center" }}>

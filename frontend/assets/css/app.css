@@ -35,7 +35,7 @@
 .crumbs { font-size: 13px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 120px; }
 .crumbs b { color: var(--text); font-weight: 600; }
 .mode { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-.mode-pill { font: 700 10px var(--mono); letter-spacing: .14em; color: var(--WATCH); border: 1px solid rgba(233,192,74,.5); background: rgba(233,192,74,.07); padding: 4px 8px; border-radius: 4px; }
+.mode-pill { white-space: nowrap; font: 700 10px var(--mono); letter-spacing: .14em; color: var(--WATCH); border: 1px solid rgba(233,192,74,.5); background: rgba(233,192,74,.07); padding: 4px 8px; border-radius: 4px; }
 .clock { font-size: 14px; font-weight: 600; white-space: nowrap; }
 .state { font-size: 10px; letter-spacing: .14em; padding: 3px 7px; border-radius: 4px; border: 1px solid var(--line-2); color: var(--dim); }
 .state.RUNNING { color: var(--NORMAL); border-color: rgba(60,196,131,.6); box-shadow: 0 0 12px rgba(60,196,131,.2); }

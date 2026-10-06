@@ -22,8 +22,8 @@
   --NA: #4b5869;
   --radius: 10px;
   --radius-sm: 6px;
-  --sans: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
-  --mono: "JetBrains Mono", "Cascadia Mono", Consolas, "SFMono-Regular", monospace;
+  --sans: "Inter", "Noto Sans Devanagari", "Noto Sans Gurmukhi", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --mono: "JetBrains Mono", "Noto Sans Devanagari", "Noto Sans Gurmukhi", "Cascadia Mono", Consolas, "SFMono-Regular", monospace;
   --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
   --ease: cubic-bezier(.2, .7, .2, 1);
 }
@@ -58,3 +58,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .kbd { font: 600 11px var(--mono); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line-2); background: rgba(255,255,255,.03); color: var(--dim); }
 
 html, body { overflow-x: clip; }
+
+/* ---------- languages: Devanagari / Gurmukhi need no tracking (it breaks conjuncts) and a little more leading */
+html[data-lang="hi"], html[data-lang="hry"], html[data-lang="pa"] { --lh-boost: 1.62; }
+html:is([data-lang="hi"], [data-lang="hry"], [data-lang="pa"]) body { line-height: 1.62; }
+html:is([data-lang="hi"], [data-lang="hry"], [data-lang="pa"]) * { letter-spacing: 0 !important; }
+.lang-select { appearance: none; -webkit-appearance: none; background: var(--panel, rgba(255,255,255,.04)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238ea3b8'/%3E%3C/svg%3E") no-repeat right 9px center;
+  color: var(--text); border: 1px solid var(--line, rgba(255,255,255,.12)); border-radius: 8px; padding: 6px 26px 6px 10px; font: 500 12.5px var(--sans); cursor: pointer; }
+.lang-select:focus-visible { outline: 2px solid var(--accent, #2ee6d6); outline-offset: 2px; }
+.lang-select option { background: var(--bg); color: var(--text); }
+.lang-pick { display: inline-flex; align-items: center; gap: 6px; }
+.lang-pick::before { content: "अ/A"; font: 600 11px var(--sans); color: var(--faint, #8ea3b8); }

@@ -100,7 +100,7 @@ async function route(full, force) {
   document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", a.dataset.r === name));
   const sname = S.subs.find((s) => s.id === S.sid)?.name || "";
   $("#crumbs").innerHTML = `GridIntel / <b>${ROUTES[name][0]}</b>${["command", "fleet", "models"].includes(name) ? "" : ` / <span class="mono">${esc(name === "investigate" && args[0] ? (S.subs.find((s) => s.id === args[0])?.name || args[0]) : sname)}</span>`}`;
-  document.title = `${ROUTES[name][0]} · GridIntel`;
+  document.title = `${window.GI18N ? window.GI18N.phrase(ROUTES[name][0]) : ROUTES[name][0]} · GridIntel`;
   try {
     if (full) { destroyCharts(); window.scrollTo({ top: 0 }); }
     await ROUTES[name][1](...args);
@@ -146,6 +146,9 @@ document.addEventListener("keydown", (e) => {
   else if (e.key.toLowerCase() === "n") control("next");
   else if (e.key === "/") { e.preventDefault(); openPalette(); }
 });
+
+// language change: re-render the current page so API sentences are rebuilt from their templates
+window.addEventListener("gi:lang", () => { document.getElementById("drawer").classList.remove("open"); if (S.token && !$("#shell").hidden) route(true); });
 
 // ------------------------------------------------------------------------------------- go
 if (S.token && S.user) start(); else $("#login").hidden = false;

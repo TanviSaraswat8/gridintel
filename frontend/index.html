@@ -6,19 +6,19 @@
   <title>GridIntel — AI-Powered Grid Intelligence</title>
   <meta name="description" content="AI-powered anomaly detection and operational intelligence for modern electrical substations. Research prototype." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" />
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/landing.css" />
   <link rel="icon" href="assets/img/mark.svg" />
 </head>
 <body>
   <header class="nav">
-    <a class="logo" href="./"><img src="assets/img/mark.svg" alt="" /><span>GRID<b>INTEL</b></span></a>
+    <a class="logo" href="./"><img src="assets/img/mark.svg" alt="" /><span data-noi18n>GRID<b>INTEL</b></span></a>
     <nav class="links">
       <a href="#capabilities">Capabilities</a><a href="#architecture">Architecture</a><a href="#research">Research</a>
       <a href="#security">Security</a><a href="#deployment">Deployment</a>
     </nav>
-    <a class="btn btn-primary btn-sm" href="app">Launch Command Center</a>
+    <div class="nav-end"><div class="lang-pick" data-lang-picker></div><a class="btn btn-primary btn-sm" href="app">Launch Command Center</a></div>
   </header>
 
   <section class="hero">
@@ -109,10 +109,12 @@
   </section>
 
   <footer class="foot">
-    <div><span class="logo"><img src="assets/img/mark.svg" alt="" /><span>GRID<b>INTEL</b></span></span>
+    <div><span class="logo"><img src="assets/img/mark.svg" alt="" /><span data-noi18n>GRID<b>INTEL</b></span></span>
       <p class="faint">This prototype is intended for research, monitoring and decision-support purposes. Risk scores and anomaly alerts are model-generated indicators and must not be treated as certified protection or fault-diagnosis outputs.</p></div>
     <a class="btn btn-primary" href="app">Launch Command Center</a>
   </footer>
+  <script src="assets/js/i18n-strings.js"></script>
+  <script src="assets/js/i18n.js"></script>
   <script src="config.js"></script>
   <script src="assets/js/landing.js"></script>
 </body>
