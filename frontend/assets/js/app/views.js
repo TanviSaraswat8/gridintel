@@ -46,7 +46,7 @@ export async function command() {
 function network(cc) {
   const subs = cc.substations; const W = 760, H = 330, n = subs.length;
   const nodes = subs.map((s, i) => ({ ...s, x: 70 + (i * (W - 140)) / Math.max(1, n - 1), y: s.voltage_class_kv >= 220 ? 120 : 220 }));
-  let g = `<svg class="topo" viewBox="0 0 ${W} ${H}" role="img" aria-label="Substation network">`;
+  let g = `<div class="topo-scroll"><svg class="topo" viewBox="0 0 ${W} ${H}" role="img" aria-label="Substation network">`;
   g += `<line x1="30" y1="40" x2="${W - 30}" y2="40" class="wire bus" stroke="#5fa8ff" opacity=".55"/><text x="30" y="30" class="sub">220 kV TRANSMISSION · HVPNL FARIDABAD (schematic placement)</text>`;
   nodes.forEach((s) => {
     const col = s.available ? color(s.risk_category) : "#4b5869";
@@ -63,7 +63,7 @@ function network(cc) {
     });
     g += `</g>`;
   });
-  return g + `</svg>`;
+  return g + `</svg></div>`;
 }
 
 function riskBars(counts) {
@@ -162,7 +162,7 @@ function sld(t) {
   const levels = has11 ? [...lv, 11] : lv; if (!levels.length) levels.push(t.substation.voltage_class_kv, 11);
   const Y = Object.fromEntries(levels.map((k, i) => [k, 70 + i * 210]));
   const H = 70 + (levels.length - 1) * 210 + 150;
-  let g = `<svg class="topo" viewBox="0 0 ${W} ${H}" role="img" aria-label="Single-line diagram">`;
+  let g = `<div class="topo-scroll"><svg class="topo" viewBox="0 0 ${W} ${H}" role="img" aria-label="Single-line diagram">`;
   const st = (n) => color(n.status === "NORMAL" ? "NORMAL" : n.status);
   levels.forEach((k) => {
     const bus = t.buses.find((b) => b.voltage_kv === k);
@@ -201,7 +201,7 @@ function sld(t) {
       g += `<g class="node" data-eq="${idx(c)}" style="color:${st(c)}"><rect x="${W - 110}" y="${y - 8}" width="16" height="16" fill="rgba(12,17,23,.96)" stroke="${st(c)}"/><text x="${W - 88}" y="${y + 22}" class="sub">coupler</text></g>`;
     });
   });
-  return g + "</svg>";
+  return g + "</svg></div>";
 }
 
 function equipDrawer(n, t) {
