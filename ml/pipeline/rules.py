@@ -13,7 +13,7 @@ import pandas as pd
 
 from .features import transformer_id
 
-RULES_VERSION = "1.0.0"
+RULES_VERSION = "1.2.0"
 
 
 def _num(x):
@@ -25,7 +25,12 @@ def _num(x):
 
 
 def _short(p: str) -> str:
-    return p.split("|")[-1].strip() if "|" in p else p
+    parts = [x.strip() for x in p.split("|")]
+    leaf = parts[-1]
+    # temperature leaves ("HV Winding", "LV W", "OIL") are ambiguous without the transformer they belong to
+    if len(parts) >= 2 and (leaf.lower() in {"o", "oil", "hv w", "lv w", "hv", "lv", "wti", "oti"} or "winding" in leaf.lower()):
+        return f"{parts[-2]} {leaf}"
+    return leaf
 
 
 def evaluate(values: pd.DataFrame, states: pd.DataFrame, ts: str, meta: dict, ref: dict) -> list[dict]:
@@ -86,7 +91,10 @@ def evaluate(values: pd.DataFrame, states: pd.DataFrame, ts: str, meta: dict, re
                     f"Check whether load was transferred onto {transformer_id(c) or 'this transformer'} and monitor its "
                     "winding / oil temperature over the following hours.")
 
-    # R-T: thermal
+    # R-T: thermal. The load->temperature fit comes from the training days only. Ambient temperature is not logged,
+    # so a whole-day offset (e.g. a warmer day) is reported separately (R-T3, WATCH level) from an hour-level
+    # excursion beyond that day's own offset (R-T1). Only same-day EARLIER hours are used (causal).
+    earlier = values[(values.index < ts) & (values["log_date"] == day)] if "log_date" in values.columns else values.iloc[:0]
     for wt, fit in ref.get("thermal_fits", {}).items():
         v, lp = _num(row.get(wt)), fit["load_parameter"]
         lv = _num(row.get(lp))
@@ -94,11 +102,30 @@ def evaluate(values: pd.DataFrame, states: pd.DataFrame, ts: str, meta: dict, re
             continue
         resid = v - (fit["slope"] * lv + fit["intercept"])
         mad = max(fit.get("resid_mad", 1.0), 0.5)
-        if resid > 3 and resid > 3 * mad:
-            hit("R-T1", 0.75 if resid > 5 * mad else 0.6, "Winding temperature above load-expected level",
+        if not (resid > 3 and resid > 3 * mad):
+            continue
+        prior = []
+        if wt in earlier.columns and lp in earlier.columns:
+            e = earlier[[wt, lp]].apply(pd.to_numeric, errors="coerce").dropna()
+            prior = (e[wt] - (fit["slope"] * e[lp] + fit["intercept"])).tolist()
+        day_offset = float(pd.Series(prior).median()) if len(prior) >= 3 else None
+        if day_offset is not None and day_offset > 3 and resid - day_offset < 3 * mad:
+            hit("R-T3", 0.35, "Winding temperature running above load-expected level all day",
+                f"{_short(wt)} has stayed about {day_offset:.0f} °C above the temperature the other days' loading "
+                f"relationship predicts (now {v:g} °C at {_short(lp)} = {lv:g}). Ambient temperature is not in the "
+                "log, so a warmer-day effect cannot be ruled out.", [wt, lp],
+                "Compare with ambient temperature and cooling-fan state for the day; trend the oil temperature.")
+        elif day_offset is None:
+            hit("R-T1", 0.45, "Winding temperature above load-expected level (early in the day)",
+                f"{_short(wt)} is {v:g} °C, {resid:.1f} °C above the temperature expected for the current loading of "
+                f"{_short(lp)} ({lv:g}). Too few earlier readings today to tell a one-off excursion from a day-long offset.",
+                [wt, lp], "Watch the next readings; compare with ambient temperature and cooling-fan state.")
+        else:
+            excess = resid - day_offset
+            hit("R-T1", 0.75 if excess > 5 * mad else 0.6, "Winding temperature above load-expected level",
                 f"{_short(wt)} is {v:g} °C, {resid:.1f} °C above the temperature expected for the current loading "
-                f"of {_short(lp)} ({lv:g}).", [wt, lp],
-                "Check cooling (fans/pumps) status, oil temperature trend and ambient conditions.")
+                f"of {_short(lp)} ({lv:g}), {excess:.1f} °C beyond this day's typical offset.",
+                [wt, lp], "Check cooling (fans/pumps) status, oil temperature trend and ambient conditions.")
         if prev is not None:
             pv = _num(prev.get(wt))
             if pv is not None and v - pv >= 4:

@@ -66,6 +66,11 @@ def classify(param: str) -> dict:
     if "coupler" in p:
         return {"category": "bus_coupler_load", "unit": "A"}
     if "load" in p or "ckt" in p or "feeder" in p or "line" in p or "i/c" in p or "incomer" in p:
+        # the column's own label decides first: an outgoing feeder listed under a "... T/F T-3" group is still a feeder
+        if re.search(r"t\s*/\s*f|transformer|incomer|i/c", leaf):
+            return {"category": "transformer_current", "unit": "A"}
+        if "outgoing" in p or "feeders of" in p:
+            return {"category": "feeder_current", "unit": "A"}
         if re.search(r"t\s*/\s*f|transformer|incomer|i/c", p):
             return {"category": "transformer_current", "unit": "A"}
         return {"category": "feeder_current", "unit": "A"}

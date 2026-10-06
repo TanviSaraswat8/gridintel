@@ -28,7 +28,7 @@ from sklearn.preprocessing import RobustScaler
 
 from .model import SubstationModel, fit_substation
 
-ENSEMBLE_VERSION = "2.0.0"
+ENSEMBLE_VERSION = "2.1.0"
 WEIGHTS = {"iforest": 0.45, "autoencoder": 0.30, "temporal_ae": 0.25}
 WINDOW = 4
 CATEGORIES = [(30, "NORMAL"), (55, "WATCH"), (75, "WARNING"), (90, "HIGH RISK"), (100, "CRITICAL")]
