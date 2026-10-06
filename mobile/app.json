@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "GridSentinel",
-    "slug": "gridsentinel-substation",
+    "name": "GridIntel",
+    "slug": "gridintel-field",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

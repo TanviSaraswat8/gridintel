@@ -26,6 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "22" }
       - name: Deploy web command center to Vercel
+        working-directory: frontend          # vercel.json + build-config.mjs live here
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

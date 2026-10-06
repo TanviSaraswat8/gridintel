@@ -1,6 +1,6 @@
 [project]
 name = "gridintel"
-version = "2.0.0"
+version = "2.1.0"
 description = "AI-powered grid intelligence for predictive substation monitoring (research prototype)"
 requires-python = ">=3.11"
 

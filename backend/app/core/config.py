@@ -44,7 +44,7 @@ def _path(var: str, default: Path) -> Path:
 class Settings(BaseModel):
     app_env: str = os.getenv("APP_ENV", "development")            # development | staging | production
     app_name: str = "GridIntel"
-    version: str = "2.0.0"
+    version: str = "2.1.0"
     api_url: str = os.getenv("API_URL", "")
     data_root: Path = _path("DATA_ROOT", ROOT / "data")
     model_path: Path = _path("MODEL_PATH", ROOT / "models")
