@@ -1,0 +1,34 @@
+# GridIntel dataset registry. Every dataset used anywhere in the project is listed here.
+# Roles:
+#   real_world_validation — HVPNL operational records (private; never committed; never mixed into public corpora)
+#   public_benchmark      — public data used ONLY to benchmark/validate methods; never used to fit HVPNL models
+datasets:
+  - id: hvpnl-faridabad-2026-02
+    name: "Dataset A — HVPNL Faridabad daily log sheets (TS Faridabad)"
+    role: real_world_validation
+    source: "Haryana Vidyut Prasaran Nigam Ltd. (HVPNL), Faridabad transmission system — supplied by the project owner"
+    url: null
+    license: "Proprietary / private operational records — not redistributable; excluded from Git"
+    files: ["02.02.2026 -TS Faridabad.xlsx", "10.02.2026 -TS Faridabad.xlsx", "27.02.2026 -TS Faridabad.xlsx"]
+    records: 376          # hourly substation-records with readings (6 sheets; 5 x 3 days less A4 header gaps, + Palla 1 day)
+    cells_ingested: 24720
+    features: "bus voltages (kV), feeder/incomer currents (A), transformer loads (MVA), oil & winding temperatures (°C), tap positions, PF, frequency, DC battery voltage, operator equipment states (ON/OFF/PTW/Breakdown/NBC)"
+    labels: "none — no fault labels. Operator PTW/Breakdown notes are equipment states, not fault labels."
+    sampling: "hourly, 01:00–24:00, three non-consecutive days (02, 10, 27 Feb 2026)"
+    coverage: "24 worksheets per file; 6 contain readings (220 Sec-46, 220 A4, 220 Palla [10 Feb only], 66 Sector 64, 66KV USA, 66 Escort I); 18 are blank templates → 'Data unavailable in supplied records'"
+    purpose: "Real-world validation via leave-one-day-out: each day is scored by models fitted on the other days."
+    local_path: "${DATA_ROOT}/raw/"
+
+  - id: ett-small-etth1
+    name: "ETT — Electricity Transformer Temperature (ETTh1)"
+    role: public_benchmark
+    source: "Zhou et al., Informer (AAAI 2021); github.com/zhouhaoyi/ETDataset"
+    url: "https://github.com/zhouhaoyi/ETDataset"
+    license: "CC BY-ND 4.0 (attribution; no derivatives — downloaded at build time, not redistributed or committed)"
+    records: 17420
+    features: "HUFL, HULL, MUFL, MULL, LUFL, LULL (high/middle/low useful & useless load), OT (oil temperature)"
+    labels: "none"
+    sampling: "hourly, 2016-07 to 2018-06, one transformer station (China)"
+    purpose: "Benchmark the transformer thermal-residual feature (oil temperature vs load relationship) and the unsupervised ensemble on a long real transformer series."
+    citation: "Zhou, H. et al. Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting. AAAI 2021."
+    fetch: "python scripts/fetch_public_data.py"
