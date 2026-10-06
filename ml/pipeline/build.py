@@ -110,6 +110,13 @@ def main() -> None:
     print("[2/6] Clean wide dataset ...")
     values, states, kept = F.build_wide(long)
     meta = {p: F.classify(p) for p in long["parameter"].unique()}
+    from . import plausibility as PL
+    by_sub = {s: values.xs(s, level="substation").dropna(axis=1, how="all") for s in values.index.get_level_values("substation").unique()}
+    meta, dq_findings = PL.validate(meta, by_sub)
+    (REPORTS / "data_quality.md").write_text(PL.report_markdown(dq_findings), encoding="utf-8")
+    (REPORTS / "data_quality.json").write_text(json.dumps(dq_findings, indent=1, ensure_ascii=False), encoding="utf-8")
+    for f in dq_findings:
+        print(f"    unit check: {f['substation']:13s} {f['parameter'][:48]:48s} -> {f['to_category']} ({f['evidence']})")
     st_suffixed = states.add_suffix(" [state]") if not states.empty else states
     values.join(st_suffixed, how="left").reset_index().to_csv(PROC / "scada_clean.csv", index=False)
 
@@ -211,9 +218,9 @@ def main() -> None:
         "ensemble": {**common, "name": f"GridIntel-Ensemble-v{ENSEMBLE_VERSION}", "weights": WEIGHTS,
                      "rules_version": R.RULES_VERSION, "artifacts": registry_models},
         "models": {
-            "isolation_forest": {**common, "name": "IForest-v2.0", "status": "trained",
+            "isolation_forest": {**common, "name": "IForest-v2.1", "status": "trained",
                                  "config": {"n_estimators": 300, "max_samples": "auto", "contamination": "auto", "scaler": "RobustScaler(10,90)"}},
-            "autoencoder": {**common, "name": "DenseAE-v2.0", "status": "trained",
+            "autoencoder": {**common, "name": "DenseAE-v2.1", "status": "trained",
                             "config": {"type": "MLPRegressor", "activation": "tanh", "hidden": "(2h, h, 2h), h=clip(n_features/8,3,10)", "alpha": 1e-3}},
             "temporal_autoencoder": {**common, "name": "TemporalWindowAE-v1.0", "status": "trained",
                                      "config": {"pca_components": "≤8", "window_hours": 4, "type": "MLPRegressor"}},

@@ -16,6 +16,7 @@ models/*.json
 models/**/metadata.json
 reports/evaluation.*
 reports/benchmarks.json
+reports/data_quality.*
 experiments/
 *.xlsx
 *.xls
