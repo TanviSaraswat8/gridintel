@@ -1,0 +1,177 @@
+"""
+GridIntel API — AI-powered grid intelligence for substation monitoring (research prototype).
+
+Run (from backend/):  uvicorn app.main:app --host 0.0.0.0 --port 8000
+"""
+from __future__ import annotations
+
+import logging
+import time
+import uuid
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
+from starlette.exceptions import HTTPException
+
+from .api.deps import STATE
+from .api.v1 import auth, grid, intel
+from .core.cache import cache, init_cache
+from .core.config import DISCLAIMER, ROOT, get_settings
+from .core.observability import ERRORS, HTTP_LATENCY, HTTP_REQUESTS, metrics_payload, request_id_var, setup_logging
+from .db.models import Base
+from .db.session import engine
+
+settings = get_settings()
+setup_logging(settings.log_level)
+log = logging.getLogger("gridintel.api")
+
+
+def _load_store():
+    from .services.store import Store
+    try:
+        return Store()
+    except FileNotFoundError as e:
+        log.warning(f"model artifacts missing ({e}); running training pipeline")
+    except Exception as e:  # version mismatch etc.
+        log.warning(f"model artifacts unusable ({type(e).__name__}: {e}); retraining")
+    from pipeline.build import main as build
+    build()
+    return Store()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    from .services.replay import ReplayEngine
+    from .services.seed import seed_reference, seed_users
+    init_cache(settings.redis_url)
+    Base.metadata.create_all(engine)          # no-op when Alembic migrations already created the schema
+    seed_users()
+    store = _load_store()
+    seed_reference(store)
+    STATE["store"] = store
+    STATE["replay"] = ReplayEngine(store)
+    STATE["replay"]._reset(None)               # replay alerts belong to a replay session; start clean (state: IDLE)
+    STATE["replay"].processed.clear()
+
+    def warm():                                # pre-compute explanations for flagged hours so first page loads are fast
+        for r in store.scored[store.scored.risk_score > 30].itertuples():
+            try:
+                store.explain(store.by_sheet[r.substation]["id"], r.timestamp)
+            except Exception:  # pragma: no cover
+                pass
+    import threading
+    threading.Thread(target=warm, daemon=True).start()
+    log.info("startup complete", extra={"event": "startup", "detail": {"env": settings.app_env, "cache": cache().name}})
+    yield
+
+
+app = FastAPI(title="GridIntel API", version=settings.version, lifespan=lifespan,
+              description="AI-powered grid intelligence for predictive substation monitoring — research prototype. " + DISCLAIMER,
+              docs_url="/docs", redoc_url="/redoc", openapi_url="/api/v1/openapi.json")
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_credentials=False,
+                   allow_methods=["GET", "POST", "OPTIONS"], allow_headers=["Authorization", "Content-Type", "X-Request-ID"])
+
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "geolocation=(), microphone=(), camera=()", "Cross-Origin-Opener-Policy": "same-origin",
+    "Content-Security-Policy": ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                                "font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' *; frame-ancestors 'none'"),
+}
+
+
+@app.middleware("http")
+async def observability(request: Request, call_next):
+    rid = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:16]
+    request_id_var.set(rid)
+    ip = request.client.host if request.client else "?"
+    path = request.url.path
+    if path.startswith("/api/") and cache().incr_window(f"rl:{ip}:{int(time.time() // 60)}", 60) > settings.rate_limit_per_minute:
+        return JSONResponse({"error": "rate_limited", "detail": "Too many requests", "request_id": rid}, status_code=429)
+    t0 = time.perf_counter()
+    try:
+        resp = await call_next(request)
+    except Exception as e:  # pragma: no cover - safety net
+        ERRORS.labels(type(e).__name__).inc()
+        log.exception("unhandled error", extra={"path": path})
+        resp = JSONResponse({"error": "internal_error", "detail": "Internal server error", "request_id": rid}, status_code=500)
+    dur = time.perf_counter() - t0
+    route = request.scope.get("route").path if request.scope.get("route") else path.split("?")[0][:60]
+    HTTP_REQUESTS.labels(request.method, route, resp.status_code).inc()
+    HTTP_LATENCY.labels(request.method, route).observe(dur)
+    resp.headers["X-Request-ID"] = rid
+    resp.headers["Server-Timing"] = f"app;dur={dur * 1000:.1f}"
+    for k, v in SECURITY_HEADERS.items():
+        resp.headers.setdefault(k, v)
+    if settings.is_production:
+        resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    if path.startswith("/api/") or path in ("/health", "/ready"):
+        log.info("request", extra={"method": request.method, "path": path, "status": resp.status_code,
+                                   "duration_ms": round(dur * 1000, 1), "client": ip})
+    return resp
+
+
+@app.exception_handler(HTTPException)
+async def http_error(request: Request, exc: HTTPException):
+    return JSONResponse({"error": "http_error", "detail": exc.detail, "request_id": request_id_var.get()},
+                        status_code=exc.status_code, headers=getattr(exc, "headers", None))
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request: Request, exc: RequestValidationError):
+    return JSONResponse({"error": "validation_error", "detail": exc.errors(), "request_id": request_id_var.get()}, status_code=422)
+
+
+@app.get("/health", tags=["system"])
+def health():
+    return {"status": "ok", "service": "gridintel-api", "version": settings.version, "env": settings.app_env}
+
+
+@app.get("/ready", tags=["system"])
+def ready():
+    checks = {"model_store": "store" in STATE, "cache": cache().name}
+    try:
+        with engine.connect() as c:
+            c.execute(text("SELECT 1"))
+        checks["database"] = True
+    except Exception:
+        checks["database"] = False
+    ok = checks["model_store"] and checks["database"]
+    return JSONResponse({"ready": ok, "checks": checks}, status_code=200 if ok else 503)
+
+
+@app.get("/metrics", tags=["system"], include_in_schema=False)
+def metrics():
+    body, ctype = metrics_payload()
+    return Response(body, media_type=ctype)
+
+
+for r in (auth.router, grid.router, intel.router):
+    app.include_router(r, prefix="/api/v1")
+
+# ---- static web app (also deployable separately to Vercel) and mobile web build
+FE = settings.frontend_dir
+MOBILE_WEB = ROOT / "mobile" / "dist"
+if MOBILE_WEB.exists():
+    app.mount("/mobile", StaticFiles(directory=MOBILE_WEB, html=True), name="mobile")
+if FE.exists():
+    app.mount("/assets", StaticFiles(directory=FE / "assets"), name="assets")
+
+    @app.get("/config.js", include_in_schema=False)
+    def runtime_config():
+        return Response(f'window.GRIDINTEL_CONFIG={{"API_URL":"{settings.api_url}"}};', media_type="application/javascript")
+
+    @app.get("/", include_in_schema=False)
+    def landing():
+        return FileResponse(FE / "index.html")
+
+    @app.get("/app", include_in_schema=False)
+    @app.get("/app/{rest:path}", include_in_schema=False)
+    def spa(rest: str = ""):
+        return FileResponse(FE / "app.html")
