@@ -1,0 +1,38 @@
+# --- secrets / env
+.env
+.env.*
+!.env.example
+mobile/.env
+
+# --- PRIVATE DATA: never commit HVPNL records or anything derived from them
+data/raw/
+data/processed/
+data/features/
+data/validation/
+data/external/
+data/*.db
+models/ensemble/
+models/*.json
+models/**/metadata.json
+reports/evaluation.*
+reports/benchmarks.json
+experiments/
+*.xlsx
+*.xls
+
+# --- build / tooling
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+frontend/config.js.bak
+.DS_Store
+Thumbs.db
