@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install ruff
+      - run: ruff check backend ml tests scripts
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Python byte-compile
+        run: python -m compileall -q backend ml scripts
+      - name: Web modules parse check
+        run: for f in frontend/assets/js/*.js frontend/assets/js/app/*.js; do node --check "$f"; done
+
+  test:
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: gridintel, POSTGRES_PASSWORD: gridintel, POSTGRES_DB: gridintel }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U gridintel" --health-interval 5s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install -r requirements-dev.txt
+      - name: Unit + pipeline + API tests (synthetic fixture workbook; private HVPNL data is not in the repo)
+        run: pytest -q --cov=backend/app --cov=ml/pipeline --cov-report=term-missing --cov-report=xml
+      - name: Migrations against PostgreSQL
+        working-directory: backend
+        env: { DATABASE_URL: "postgresql://gridintel:gridintel@localhost:5432/gridintel" }
+        run: python -m alembic upgrade head
+      - uses: actions/upload-artifact@v4
+        with: { name: coverage, path: coverage.xml }
+
+  build-mobile:
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: mobile } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm, cache-dependency-path: mobile/package-lock.json }
+      - run: npm ci
+      - run: npx expo export --platform web --output-dir dist
+        env: { CI: "1", EXPO_OFFLINE: "1" }
+
+  docker:
+    needs: [test, build-mobile]
+    runs-on: ubuntu-latest
+    permissions: { contents: read, packages: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: npm, cache-dependency-path: mobile/package-lock.json }
+      - name: Build mobile web bundle (copied into the image)
+        working-directory: mobile
+        run: npm ci && npx expo export --platform web --output-dir dist
+        env: { CI: "1", EXPO_OFFLINE: "1" }
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        if: github.ref == 'refs/heads/main'
+        with: { registry: ghcr.io, username: "${{ github.actor }}", password: "${{ secrets.GITHUB_TOKEN }}" }
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ghcr.io/${{ github.repository_owner }}/gridintel-api:latest,ghcr.io/${{ github.repository_owner }}/gridintel-api:${{ github.sha }}

@@ -1,0 +1,32 @@
+# Render Blueprint: API (Docker) + managed PostgreSQL + Redis (Key Value).
+# Dashboard → New → Blueprint → select this repo. Then upload the private HVPNL workbooks to the disk at /data/raw.
+services:
+  - type: web
+    name: gridintel-api
+    runtime: docker
+    plan: starter
+    healthCheckPath: /health
+    disk: { name: gridintel-data, mountPath: /data, sizeGB: 1 }
+    envVars:
+      - { key: APP_ENV, value: production }
+      - { key: DATA_ROOT, value: /data }
+      - { key: MODEL_PATH, value: /data/models }
+      - { key: REPORTS_DIR, value: /data/models/reports }
+      - { key: JWT_SECRET, generateValue: true }
+      - { key: CORS_ORIGINS, sync: false }          # e.g. https://gridintel.vercel.app
+      - { key: API_URL, sync: false }               # public URL of this service
+      - { key: DEMO_USERS_ENABLED, value: "true" }  # set false for real deployments
+      - { key: ADMIN_USERNAME, sync: false }
+      - { key: ADMIN_PASSWORD, sync: false }
+      - key: DATABASE_URL
+        fromDatabase: { name: gridintel-db, property: connectionString }
+      - key: REDIS_URL
+        fromService: { type: keyvalue, name: gridintel-redis, property: connectionString }
+  - type: keyvalue
+    name: gridintel-redis
+    plan: free
+    ipAllowList: []
+databases:
+  - name: gridintel-db
+    plan: basic-256mb
+    databaseName: gridintel

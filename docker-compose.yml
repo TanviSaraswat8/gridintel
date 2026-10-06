@@ -1,0 +1,28 @@
+# Local development stack: API + PostgreSQL + Redis. Put the HVPNL .xlsx files in ./data/raw first.
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+    env_file: [.env]
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://gridintel:gridintel@db:5432/gridintel
+      REDIS_URL: redis://redis:6379/0
+      DATA_ROOT: /data
+      MODEL_PATH: /models
+      REPORTS_DIR: /models/reports
+    volumes:
+      - ./data:/data
+      - ./models:/models
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_started }
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: gridintel, POSTGRES_PASSWORD: gridintel, POSTGRES_DB: gridintel }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U gridintel"], interval: 5s, retries: 20 }
+  redis:
+    image: redis:7-alpine
+volumes:
+  pgdata:

@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+!.env.example
+**/__pycache__
+.pytest_cache
+.venv
+mobile/node_modules
+mobile/.expo
+data/raw
+data/processed
+data/features
+data/external
+data/*.db
+models/ensemble
+experiments
