@@ -1,0 +1,1 @@
+window.GRIDINTEL_CONFIG={"API_URL":""};

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GridIntel — AI-Powered Grid Intelligence</title>
+  <meta name="description" content="AI-powered anomaly detection and operational intelligence for modern electrical substations. Research prototype." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/landing.css" />
+  <link rel="icon" href="assets/img/mark.svg" />
+</head>
+<body>
+  <header class="nav">
+    <a class="logo" href="./"><img src="assets/img/mark.svg" alt="" /><span>GRID<b>INTEL</b></span></a>
+    <nav class="links">
+      <a href="#capabilities">Capabilities</a><a href="#architecture">Architecture</a><a href="#research">Research</a>
+      <a href="#security">Security</a><a href="#deployment">Deployment</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="app">Launch Command Center</a>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="pulse"></span> AI-powered grid intelligence for predictive substation monitoring</div>
+      <h1>See the Grid<br />Before It Fails.</h1>
+      <p class="lead">AI-powered anomaly detection and operational intelligence for modern electrical substations — turning SCADA log data into risk scores, early warnings and explainable investigations.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="app">Launch Command Center <span aria-hidden="true">→</span></a>
+        <a class="btn" href="#capabilities">Explore the Intelligence</a>
+      </div>
+      <p class="fine">Decision support only — not a certified protection system. Demonstrated on real HVPNL Faridabad records in historical replay.</p>
+    </div>
+    <div class="hero-viz" aria-hidden="true">
+      <svg id="gridViz" viewBox="0 0 640 520"></svg>
+      <div class="viz-legend">
+        <span><i class="dot n"></i>Healthy</span><span><i class="dot w"></i>Watch</span><span><i class="dot r"></i>Risk</span>
+        <span class="mono faint">SCADA → features → ensemble → risk</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" id="stats">
+    <div class="stat"><div class="v mono" data-k="substations_monitored">—</div><div class="k">Substations with source readings</div></div>
+    <div class="stat"><div class="v mono" data-k="hourly_records">—</div><div class="k">Hourly records scored</div></div>
+    <div class="stat"><div class="v mono" data-k="parameters_ingested">—</div><div class="k">Parameters catalogued</div></div>
+    <div class="stat"><div class="v mono" data-k="models_n">—</div><div class="k">Detection layers in the ensemble</div></div>
+    <div class="stat"><div class="v mono" data-k="replay_mode">—</div><div class="k">Replay engine</div></div>
+  </section>
+
+  <section class="block" id="capabilities">
+    <div class="block-head"><div class="eyebrow">Capabilities</div><h2>From raw log sheets to explainable early warning</h2></div>
+    <div class="cards">
+      <article><div class="ic">◎</div><h3>Anomaly detection</h3><p>Isolation Forest, dense autoencoder and a temporal-window autoencoder score every hourly record against each substation's own learned behaviour.</p></article>
+      <article><div class="ic">⚡</div><h3>Operational risk scoring</h3><p>Model evidence fused with engineering rules — voltage collapse, incomer drop-outs, thermal residuals — into a 0–100 risk indicator with confidence.</p></article>
+      <article><div class="ic">⌁</div><h3>Equipment intelligence</h3><p>A digital substation built from the log-sheet structure: buses, transformers, feeders and couplers, each coloured by its contributing signals.</p></article>
+      <article><div class="ic">◈</div><h3>Investigation workspace</h3><p>What happened, why it was flagged, how unusual it is and what an engineer should check — backed by the source measurements.</p></article>
+      <article><div class="ic">▦</div><h3>Fleet analytics</h3><p>Voltage, loading and temperature health across substations, anomaly timelines, equipment loading against nameplate rating.</p></article>
+      <article><div class="ic">⟲</div><h3>Historical replay</h3><p>Real records replayed through the live inference path at 1×–10×. Live SCADA ingestion is not connected — and the product says so.</p></article>
+    </div>
+  </section>
+
+  <section class="block" id="architecture">
+    <div class="block-head"><div class="eyebrow">Architecture</div><h2>One pipeline, two clients, no fabricated data</h2></div>
+    <div class="arch">
+      <div class="arch-row">
+        <div class="node src">HVPNL SCADA log sheets<small>real-world validation data</small></div>
+        <div class="node src">Public benchmarks<small>method validation only</small></div>
+      </div>
+      <div class="flow">↓</div>
+      <div class="arch-row"><div class="node">Ingestion &amp; cleaning<small>merged headers · status tokens · causal imputation</small></div>
+        <div class="node">Feature store<small>deviation · rate of change · thermal residual · imbalance · state transitions</small></div></div>
+      <div class="flow">↓</div>
+      <div class="arch-row"><div class="node ai">Ensemble anomaly engine<small>IForest · Autoencoder · Temporal AE · Engineering rules</small></div>
+        <div class="node ai">Risk · confidence · explanations<small>leave-one-day-out validated</small></div></div>
+      <div class="flow">↓</div>
+      <div class="arch-row"><div class="node">FastAPI · JWT/RBAC · PostgreSQL · Redis<small>/api/v1 · /health · /ready · /metrics</small></div></div>
+      <div class="flow">↓</div>
+      <div class="arch-row"><div class="node app">Command Center (web)</div><div class="node app">Field app (Expo)</div></div>
+    </div>
+  </section>
+
+  <section class="block" id="research">
+    <div class="block-head"><div class="eyebrow">Research</div><h2>Honest validation on real substation data</h2></div>
+    <div class="cols">
+      <div><h3>Out-of-sample by design</h3><p>Every day of HVPNL data is scored only by models fitted on the other days — reference statistics, feature selection, scaling and calibration included. No leakage, no fabricated labels, no accuracy claims where no labels exist.</p></div>
+      <div><h3>Real events, real evidence</h3><p>On 02 Feb 2026 10:00 the 11 kV T-I voltage at 220 kV Sector-46 was logged at 0 kV; on 10 Feb 2026 08:00 the T-2 incomer and several feeders dropped to 0 A while T-4 loading rose. Both surface as high-risk investigations from unseen-day models.</p></div>
+      <div><h3>Stated limits</h3><p>Three non-consecutive days, hourly manual logs, six of twenty-four sheets with readings. Risk categories are a prototype AI classification — not protection settings.</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="security">
+    <div class="block-head"><div class="eyebrow">Security</div><h2>Built like an operational system</h2></div>
+    <ul class="checks">
+      <li>JWT authentication with ADMIN · ENGINEER · OPERATOR · VIEWER roles</li><li>PBKDF2 password hashing — no plaintext credentials</li>
+      <li>Rate limiting, input validation, secure headers, CORS allow-list</li><li>Audit log for logins, replay control, exports and investigation notes</li>
+      <li>Secrets only via environment variables</li><li>Private datasets never committed to source control</li>
+    </ul>
+  </section>
+
+  <section class="block" id="deployment">
+    <div class="block-head"><div class="eyebrow">Deployment</div><h2>Container-first, cloud-ready</h2></div>
+    <div class="cards three">
+      <article><h3>Web</h3><p>Static command center — Vercel or any CDN, configured with <code>API_URL</code>.</p></article>
+      <article><h3>API</h3><p>Docker image on Render / Railway / Fly.io with managed PostgreSQL and Redis. Alembic migrations on start.</p></article>
+      <article><h3>Field app</h3><p>Expo (React Native) app against the same API, plus a browser build.</p></article>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div><span class="logo"><img src="assets/img/mark.svg" alt="" /><span>GRID<b>INTEL</b></span></span>
+      <p class="faint">This prototype is intended for research, monitoring and decision-support purposes. Risk scores and anomaly alerts are model-generated indicators and must not be treated as certified protection or fault-diagnosis outputs.</p></div>
+    <a class="btn btn-primary" href="app">Launch Command Center</a>
+  </footer>
+  <script src="config.js"></script>
+  <script src="assets/js/landing.js"></script>
+</body>
+</html>

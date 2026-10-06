@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>GridIntel · Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="/assets/css/base.css" />
+  <link rel="stylesheet" href="/assets/css/app.css" />
+  <link rel="icon" href="/assets/img/mark.svg" />
+</head>
+<body>
+  <div id="login" class="login" hidden>
+    <form class="login-card glass" id="loginForm" autocomplete="on">
+      <a class="logo" href="/"><img src="/assets/img/mark.svg" alt="" /><span>GRID<b>INTEL</b></span></a>
+      <h1>Command Center access</h1>
+      <p class="dim">Sign in to monitor substations. Demo: <span class="mono">operator / hvpnl2026</span></p>
+      <label>Username<input name="username" value="operator" autocomplete="username" required maxlength="64" /></label>
+      <label>Password<input name="password" type="password" value="hvpnl2026" autocomplete="current-password" required maxlength="256" /></label>
+      <div class="err" id="loginErr" role="alert"></div>
+      <button class="btn btn-primary" type="submit">Sign in</button>
+      <p class="faint tiny">Research prototype · decision support only · not a certified protection system.</p>
+    </form>
+  </div>
+
+  <div id="shell" class="shell" hidden>
+    <aside class="rail" id="rail">
+      <a class="logo" href="/" title="GridIntel home"><img src="/assets/img/mark.svg" alt="" /><span>GRID<b>INTEL</b></span></a>
+      <nav id="nav">
+        <a data-r="command" href="#/command"><i>◉</i><span>Command Center</span><kbd class="kbd">1</kbd></a>
+        <a data-r="scada" href="#/scada"><i>∿</i><span>SCADA Live</span><kbd class="kbd">2</kbd></a>
+        <a data-r="digital" href="#/digital"><i>⌬</i><span>Digital Substation</span><kbd class="kbd">3</kbd></a>
+        <a data-r="investigate" href="#/investigate"><i>◈</i><span>Investigation</span><kbd class="kbd">4</kbd><b class="count" id="alertCount" hidden>0</b></a>
+        <a data-r="fleet" href="#/fleet"><i>▦</i><span>Fleet Intelligence</span><kbd class="kbd">5</kbd></a>
+        <a data-r="analytics" href="#/analytics"><i>⟋</i><span>Analytics</span><kbd class="kbd">6</kbd></a>
+        <a data-r="models" href="#/models"><i>⧉</i><span>AI Model Lab</span><kbd class="kbd">7</kbd></a>
+        <a data-r="explorer" href="#/explorer"><i>⌸</i><span>Data Explorer</span><kbd class="kbd">8</kbd></a>
+      </nav>
+      <div class="rail-foot">
+        <div class="tiny faint">Dataset A · HVPNL Faridabad</div>
+        <div class="tiny faint">Historical replay · live ingestion not connected</div>
+        <button class="btn btn-ghost btn-sm" id="logout">Sign out</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar glass">
+        <button class="btn btn-ghost btn-sm menu" id="menuBtn" aria-label="Menu">☰</button>
+        <div class="crumbs" id="crumbs"></div>
+        <div class="mode"><span class="mode-pill">HISTORICAL REPLAY</span><span class="clock mono" id="clock">—</span><span class="state mono" id="rstate">IDLE</span></div>
+        <div class="replay" id="replayCtl">
+          <select id="subSel" title="Substation" aria-label="Substation"></select>
+          <select id="dateSel" title="Replay date" aria-label="Replay date"></select>
+          <button class="btn btn-sm btn-primary" data-act="start" title="Start replay (Space)">▶</button>
+          <button class="btn btn-sm" data-act="pause" title="Pause">❚❚</button>
+          <button class="btn btn-sm" data-act="next" title="Next record (N)">⏭</button>
+          <button class="btn btn-sm" data-act="stop" title="Stop and rewind">■</button>
+          <div class="speed" id="speed"><button data-s="1">1×</button><button data-s="2">2×</button><button data-s="5">5×</button><button data-s="10">10×</button></div>
+        </div>
+        <button class="btn btn-sm search" id="paletteBtn" title="Command palette">⌕ <span>Search</span> <kbd class="kbd">Ctrl K</kbd></button>
+        <div class="user mono tiny" id="user"></div>
+      </header>
+      <div class="progress"><span id="prog"></span></div>
+      <main id="view" class="view" tabindex="-1"></main>
+      <footer class="disclaimer">Prototype AI risk classification — not certified protection thresholds. This prototype is intended for research, monitoring and decision-support purposes; risk scores and anomaly alerts are model-generated indicators and must not be treated as certified protection or fault-diagnosis outputs.</footer>
+    </div>
+  </div>
+
+  <div id="drawer" class="drawer" aria-hidden="true"><div class="drawer-body glass" id="drawerBody"></div></div>
+  <div id="palette" class="palette" hidden><div class="palette-box glass"><input id="paletteInput" placeholder="Jump to page, substation, event or action…" aria-label="Command palette" /><ul id="paletteList"></ul></div></div>
+  <div id="modal" class="modal" hidden><div class="modal-box glass" id="modalBox"></div></div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="/config.js"></script>
+  <script src="/assets/vendor/chart.umd.min.js"></script>
+  <script type="module" src="/assets/js/app/main.js"></script>
+</body>
+</html>

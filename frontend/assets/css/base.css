@@ -1,0 +1,58 @@
+/* GridIntel design system — graphite, electric cyan, restrained status colour. */
+[hidden] { display: none !important; }
+:root {
+  --bg: #090c11;
+  --bg-2: #0c1117;
+  --surface: rgba(18, 25, 34, 0.78);
+  --surface-2: rgba(24, 33, 44, 0.85);
+  --surface-solid: #121922;
+  --line: rgba(130, 170, 210, 0.11);
+  --line-2: rgba(130, 170, 210, 0.2);
+  --text: #e4eaf1;
+  --dim: #93a1b2;
+  --faint: #5f6c7d;
+  --cyan: #38c8e8;
+  --cyan-2: #5fa8ff;
+  --cyan-glow: rgba(56, 200, 232, 0.22);
+  --NORMAL: #3cc483;
+  --WATCH: #e9c04a;
+  --WARNING: #f09a3e;
+  --HIGHRISK: #f0544f;
+  --CRITICAL: #ff2d6f;
+  --NA: #4b5869;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --sans: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Mono", Consolas, "SFMono-Regular", monospace;
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
+body::before { /* engineering grid texture */
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: linear-gradient(rgba(120, 170, 220, .035) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(120, 170, 220, .035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at 50% 0%, #000 30%, transparent 85%);
+}
+a { color: var(--cyan); text-decoration: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+::selection { background: rgba(56, 200, 232, .3); }
+.mono { font-family: var(--mono); }
+.dim { color: var(--dim); }
+.faint { color: var(--faint); }
+.tiny { font-size: 11px; }
+.upper { text-transform: uppercase; letter-spacing: .12em; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid var(--line-2);
+  background: var(--surface-2); cursor: pointer; font-weight: 600; font-size: 13px; transition: border-color .2s var(--ease), background .2s, transform .1s; white-space: nowrap; }
+.btn:hover { border-color: rgba(56, 200, 232, .55); }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: linear-gradient(180deg, #2bb5d6, #1b8fb0); border-color: #3fd2f0; color: #031018; box-shadow: 0 0 0 1px rgba(56,200,232,.2), 0 6px 22px var(--cyan-glow); }
+.btn-primary:hover { background: linear-gradient(180deg, #3cc6e6, #22a1c4); }
+.btn-ghost { background: transparent; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.kbd { font: 600 11px var(--mono); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line-2); background: rgba(255,255,255,.03); color: var(--dim); }
