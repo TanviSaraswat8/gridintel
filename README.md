@@ -184,7 +184,17 @@ Unsupervised evaluation only (no fault labels): out-of-sample risk distributions
 
 - **02 Feb 2026 10:00, 220 kV Sector-46** — 11 kV T-I voltage logged 0 kV: **HIGH RISK** out-of-sample (rule R-V1 + models).
 - **10 Feb 2026 08:00, 220 kV Sector-46** — T-2 11 kV incomer and several feeders to 0 A while T-4 loading rose: **HIGH RISK**, driven by rule R-L1; the ML models alone scored it low on the unseen day — evidence for the hybrid design.
-- Sector-46 and 66KV USA: ~72 % of unseen hours NORMAL. Escort I and Sector 64 flag most unseen hours — real day-to-day shift that needs more history.
+- **Same hour, 66 kV USA** — also HIGH RISK out-of-sample (incomer/feeder drop-out). USA is fed from the Palla and Sector-46 lines; the coincidence is worth checking against the shift log but the data cannot establish a cause.
+- **27 Feb 2026, 220 kV A4** — all four transformers run ~15 °C hotter than the 2 and 10 Feb load→temperature relationship predicts (T-1 oil 30 → 37 → 52 °C across the three days). Reported as a day-long WATCH-level offset (rule R-T3), because a station-wide shift across independent transformers is consistent with a warmer day and ambient temperature is not logged; only hour-level excursions beyond that offset escalate.
+- Out-of-sample share of WARNING-or-above hours: Sector-46 4 %, 66KV USA 4 %, Sector 64 4 %, A4 11 %, Palla 8 % (single day, in-sample), Escort I 0 %.
+- ETTh1: a static load→temperature fit does not generalise across seasons (test R² < 0), so the thermal residual is a contributing signal only.
+
+### Data-quality findings (unit plausibility)
+Merged log-sheet headers can mislabel a column. `ml/pipeline/plausibility.py` checks every header-inferred unit against physics before any rule or display uses it ([report](reports/data_quality.md) is generated locally):
+- **66 Sector 64** — six columns under a merged *LOAD IN MVA* header are currents in amps: √3 × 11 kV × 410 A = 7.81 MVA and √3 × 66 kV × 68.3 A = 7.81 MVA, both matching the 7.81 MVA logged for T-1 (likewise T-2, T-3). Re-classified as currents. Before this check, a rule reported "794 % of rating".
+- **66 Escort I** — the column headed *66 KV Bus I* holds values of 47–138 that follow the load curve; it cannot be a 66 kV bus voltage and is marked *unverified* (kept in the data, excluded from voltage rules and cards).
+- Auxiliary 240 V AC and DC battery columns are separated from power-bus voltages.
+No value is altered — only the label used by rules and displays.
 - ETTh1: a static load→temperature fit does not generalise across seasons (test R² < 0), so the thermal residual is a contributing signal only.
 
 Full report: `reports/evaluation.md` (generated; not committed because it summarises private data).
@@ -197,7 +207,8 @@ JWT (HS256, expiry) with ADMIN / ENGINEER / OPERATOR / VIEWER roles; PBKDF2-SHA2
 
 - Three non-consecutive days of hourly manual logs; ≤ 72 records per substation; 18 of 24 sheets blank. Models describe short-term unusualness, not seasonal behaviour.
 - No fault labels: risk is a calibrated relative indicator, not a fault probability; thresholds are prototype values.
-- Units are inferred from sheet headers; nameplate ratings parsed from header text.
+- Units are inferred from sheet headers and checked for physical plausibility; one Escort I column could not be verified and is excluded from engineering rules. Nameplate ratings are parsed from header text.
+- Ambient temperature is not in the logs, so the thermal rules cannot separate a warmer day from a transformer effect (hence R-T3 is WATCH-level only).
 - Rolling/rate features reset each day (days are not consecutive).
 - Replay only — live SCADA ingestion is not connected. Single-process replay engine (state mirrored to Redis, not shared across workers).
 - LSTM autoencoder and supervised models not trained (insufficient sequences; no labels).

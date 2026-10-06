@@ -47,7 +47,9 @@ No fault labels exist, so no accuracy, precision, recall or F1 is reported for H
 
 ## 10. Results (current run)
 - Both reviewed Sector-46 events are HIGH RISK out-of-sample. The 0 kV event is caught by rules and models; the T-2 drop-out is caught by the rule engine while the ML detectors score the unseen day low — the hybrid design matters.
-- Sector-46 and 66KV USA: most unseen hours NORMAL/WATCH; Escort I and Sector 64 show strong day-to-day shift (most unseen hours WARNING+) — a data-volume limitation, reported rather than tuned away.
+- Out-of-sample WARNING-or-above share: Sector-46, 66KV USA and Sector 64 ≈ 4 % of hours; A4 11 %; Escort I 0 %.
+- An earlier run flagged most unseen hours at Escort I and Sector 64. Investigation showed this was **not** day-to-day drift but header/unit errors: currents under a merged "LOAD IN MVA" header (confirmed by √3·V·I matching the logged MVA to 0.1 %) and a load-like column headed as a 66 kV bus voltage. The fix was a physics-based plausibility layer (`ml/pipeline/plausibility.py`), not threshold tuning; the corrected classifications are listed in `reports/data_quality.md`.
+- 220 A4 on 27 Feb: every transformer runs ~15 °C above the other days' load→temperature relation. With no ambient data this is reported as a WATCH-level sustained offset (R-T3); only excursions beyond the day's own offset escalate (R-T1).
 - ETTh1: static load→temperature fit R² 0.34 train / negative test across seasons; Isolation Forest shows no material drift. Conclusion: the thermal residual must be fitted on recent, same-season data and used only as a contributing signal.
 
 ## 11. Limitations
