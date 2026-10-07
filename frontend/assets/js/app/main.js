@@ -22,6 +22,13 @@ $("#loginForm").onsubmit = async (e) => {
   } catch (err) { $("#loginErr").textContent = err.message; }
 };
 $("#logout").onclick = () => logout();
+// demo credentials are only offered when the server has demo logins enabled (off in production)
+fetch(API.replace(/\/api\/v1$/, "") + "/health").then((r) => r.json()).then((h) => {
+  if (h.demo_logins === false) {
+    $("#demoHint")?.remove();
+    const f = $("#loginForm"); if (f && f.username) { f.username.value = ""; f.password.value = ""; }
+  }
+}).catch(() => {});
 
 // ------------------------------------------------------------------------------------- first-run setup (hosted deployments)
 // A hosted instance starts in AWAITING DATA mode: no private workbooks, no models. An ADMIN uploads the artifact

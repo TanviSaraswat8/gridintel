@@ -157,3 +157,7 @@ def test_docs_csp_allows_swagger_but_app_stays_strict(client):
     assert "https://cdn.jsdelivr.net" in docs and "'unsafe-inline'" in docs.split("script-src")[1].split(";")[0]
     app_csp = client.get("/app").headers["content-security-policy"]
     assert "script-src 'self';" in app_csp and "jsdelivr" not in app_csp
+
+
+def test_health_reports_demo_login_setting(client):
+    assert isinstance(client.get("/health").json()["demo_logins"], bool)

@@ -71,6 +71,13 @@ export function LoginScreen({ onLogin }) {
   const [pass, setPass] = useState("hvpnl2026");
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [demo, setDemo] = useState(true);
+  // demo credentials are only offered when the server has demo logins enabled (off in production)
+  useEffect(() => {
+    fetch(getBase() + "/health").then((r) => r.json()).then((h) => {
+      if (h.demo_logins === false) { setDemo(false); setUser(""); setPass(""); }
+    }).catch(() => {});
+  }, []);
   const go = async () => {
     setBusy(true); setErr(null);
     try {
@@ -97,7 +104,7 @@ export function LoginScreen({ onLogin }) {
         {err ? <Text style={{ color: "#ff8c8c", marginBottom: 10 }}>{err}</Text> : null}
         <Btn title={busy ? "SIGNING IN…" : "SIGN IN"} kind="primary" onPress={go} disabled={busy} />
       </Panel>
-      <Text style={s.faint}>Demo: operator / hvpnl2026. Phone and API must be on the same network (or use the deployed API URL).</Text>
+      {demo ? <Text style={s.faint}>Demo: operator / hvpnl2026. Phone and API must be on the same network (or use the deployed API URL).</Text> : null}
     </ScrollView>
   );
 }
