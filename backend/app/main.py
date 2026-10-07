@@ -86,6 +86,10 @@ SECURITY_HEADERS = {
     "Content-Security-Policy": ("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
                                 "font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' *; frame-ancestors 'none'"),
 }
+DOCS_PATHS = {"/docs", "/redoc", "/docs/oauth2-redirect"}
+DOCS_CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https://fastapi.tiangolo.com https://cdn.redoc.ly; worker-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'")
 
 
 @app.middleware("http")
@@ -109,6 +113,8 @@ async def observability(request: Request, call_next):
     HTTP_LATENCY.labels(request.method, route).observe(dur)
     resp.headers["X-Request-ID"] = rid
     resp.headers["Server-Timing"] = f"app;dur={dur * 1000:.1f}"
+    if path in DOCS_PATHS:   # Swagger UI / ReDoc load from jsdelivr with an inline bootstrap; the app pages stay strict
+        resp.headers.setdefault("Content-Security-Policy", DOCS_CSP)
     for k, v in SECURITY_HEADERS.items():
         resp.headers.setdefault(k, v)
     if settings.is_production:

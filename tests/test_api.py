@@ -150,3 +150,10 @@ def test_every_replay_control_is_audited(client, op, admin):
     rows = rows.get("items", rows) if isinstance(rows, dict) else rows
     actions = {r["action"] for r in rows}
     assert {"replay.stop", "replay.seek", "replay.next", "replay.speed", "replay.pause"} <= actions
+
+
+def test_docs_csp_allows_swagger_but_app_stays_strict(client):
+    docs = client.get("/docs").headers["content-security-policy"]
+    assert "https://cdn.jsdelivr.net" in docs and "'unsafe-inline'" in docs.split("script-src")[1].split(";")[0]
+    app_csp = client.get("/app").headers["content-security-policy"]
+    assert "script-src 'self';" in app_csp and "jsdelivr" not in app_csp
