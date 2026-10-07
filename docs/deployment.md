@@ -29,6 +29,10 @@ GitHub (TanviSaraswat8/gridintel) ──push──► GitHub Actions CI ──�
 - **Redis is not provisioned.** There's one instance, so the in-memory cache and replay state are enough. Set `REDIS_URL` if you scale out.
 - **Models.** Training needs about 1 GB of RAM, more than the free instance has, so the server doesn't train (`TRAIN_ON_START=false`). An ADMIN uploads the bundle once. It's stored in PostgreSQL and restored on every start, including after a free-plan sleep.
 
+## Live instance
+
+`https://gridintel-6gce.onrender.com` (Render service `gridintel`, database `gridintel-db`, Singapore, free plan).
+
 ## Steps
 
 1. **Render account.** Sign up at render.com with GitHub, and allow Render to read the `gridintel` repository.

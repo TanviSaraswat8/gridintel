@@ -17,11 +17,11 @@ GridIntel turns historical and (future) streaming SCADA data from electrical sub
 |---|---|---|
 | GitHub | https://github.com/TanviSaraswat8/gridintel (branch `main`) | live |
 | CI | https://github.com/TanviSaraswat8/gridintel/actions | runs on every push |
-| Web (landing / command center) | `https://<service>.onrender.com/` · `/app` | not deployed yet (needs a Render account; see [docs/deployment.md](docs/deployment.md)) |
-| API | `https://<service>.onrender.com/api/v1` · `/health` · `/ready` · `/docs` | not deployed yet |
-| Mobile (browser build) | `https://<service>.onrender.com/mobile` | not deployed yet |
+| Web (landing / command center) | https://gridintel-6gce.onrender.com/ · https://gridintel-6gce.onrender.com/app | live (Render free plan, PUBLIC DEMO MODE) |
+| API | https://gridintel-6gce.onrender.com/api/v1 · [/health](https://gridintel-6gce.onrender.com/health) · [/ready](https://gridintel-6gce.onrender.com/ready) · [/docs](https://gridintel-6gce.onrender.com/docs) | live |
+| Mobile (browser build) | https://gridintel-6gce.onrender.com/mobile | live |
 
-These rows get the real URLs once the service is live.
+The hosted instance has demo logins off, so sign in with the admin account set in Render. On the free plan it sleeps after about 15 minutes idle, and the first request after that takes about a minute.
 
 ## Overview
 
