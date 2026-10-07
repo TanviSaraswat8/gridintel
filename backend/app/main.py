@@ -6,6 +6,7 @@ Run (from backend/):  uvicorn app.main:app --host 0.0.0.0 --port 8000
 from __future__ import annotations
 
 import logging
+import mimetypes
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -163,6 +164,8 @@ def metrics():
 
 for r in (auth.router, grid.router, intel.router, admin.router):
     app.include_router(r, prefix="/api/v1")
+
+mimetypes.add_type("application/manifest+json", ".webmanifest")  # slim images lack /etc/mime.types
 
 # ---- static web app (also deployable separately to Vercel) and mobile web build
 FE = settings.frontend_dir

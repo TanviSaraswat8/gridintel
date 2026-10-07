@@ -7,7 +7,8 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "in.gridintel.field"
     },
     "android": {
       "adaptiveIcon": {
@@ -15,15 +16,22 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "in.gridintel.field"
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "output": "single"
+      "output": "single",
+      "name": "GridIntel Field",
+      "shortName": "GridIntel",
+      "themeColor": "#0b1016",
+      "backgroundColor": "#090c11"
     },
     "backgroundColor": "#0b0f14",
     "splash": {
-      "backgroundColor": "#0b0f14"
+      "backgroundColor": "#0b0f14",
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain"
     },
     "experiments": {
       "baseUrl": "/mobile"
