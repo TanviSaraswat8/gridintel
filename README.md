@@ -97,6 +97,7 @@ Details: [docs/architecture.md](docs/architecture.md).
 - **Analytics** — date range, substation and parameter filters; trends, risk distribution, anomaly timeline, equipment loading vs rating, contributing-signal ranking, correlation matrix.
 - **AI Model Lab** — model versions, configs, artifacts with SHA-256, inference latency, unsupervised validation, reviewed events, public benchmarks.
 - **Data Explorer** — raw cell vs cleaned value, rolling statistics, anomaly score, paginated, CSV export (audit-logged).
+- **Alert notifications** — the field app (installed from `/mobile`) can receive phone notifications for new alerts even when it is closed. Each user chooses HIGH RISK + CRITICAL (default), WARNING and above, or CRITICAL only, in their language, and tapping a notification opens the investigation. Standards-based Web Push (RFC 8291 encryption, RFC 8292 VAPID). Only known browser push services are contacted, and notifications carry no measurements. Android: Chrome. iPhone: the Home Screen app, iOS 16.4+.
 - **Languages** — English, हिन्दी (Hindi), हरियाणवी (Haryanvi) and ਪੰਜਾਬੀ (Punjabi) across the landing page, command center and field app, including the AI investigation text (see [Languages](#languages)).
 - Command palette (Ctrl/⌘ K), keyboard shortcuts (1–8 pages, Space play/pause, N next), toasts, skeletons, confirmation dialogs, responsive layouts.
 
@@ -191,6 +192,7 @@ The bundle is validated (allowed paths only, no links, size caps), stored in Pos
 | `JWT_SECRET` | ≥ 32 chars, **required in production** | ephemeral in dev |
 | `JWT_EXPIRE_MINUTES` | token lifetime | 480 |
 | `CORS_ORIGINS` | comma-separated; `*` refused in production | own URL on Render (`RENDER_EXTERNAL_URL`), `*` in dev |
+| `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | push-notification signing key (base64url P-256 scalar) and contact | generated once and stored in the database / `mailto:alerts@gridintel.invalid` |
 | `DATA_MODE` | `local` (real workbooks on this machine) / `public` (uploaded bundle only) | `local` if `data/raw/*.xlsx` exist |
 | `DATA_ROOT` / `MODEL_PATH` / `REPORTS_DIR` | data layers, model registry, reports | `./data`, `./models`, `./reports` |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | bootstrap admin (hashed on first start) | unset |

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Animated, BackHandler, Pressable, StatusBar, View } from "react-native";
 import { Text, useLang } from "./src/i18n";
 import { api, setOnUnauthorized, setToken } from "./src/api";
+import * as Push from "./src/push";
 import {
   AlertsScreen, AnalyticsScreen, GridScreen, HomeScreen, InvestigationScreen, LoginScreen, ProfileScreen, ScadaScreen, SubstationScreen,
 } from "./src/screens";
@@ -47,7 +48,14 @@ export default function App() {
   const tab = (name) => setStack([{ name, params: {} }]);
   const logout = () => { setToken(null); setUser(null); setStack([{ name: "home", params: {} }]); lastAlert.current = null; };
 
-  useEffect(() => { setOnUnauthorized(logout); }, []);
+  useEffect(() => { setOnUnauthorized(logout); Push.register(); }, []);
+  // notification taps: "?inv=" when the tap opened the app, a service-worker message when it was already open
+  const pendingInv = useRef(Push.pendingInvestigation());
+  useEffect(() => {
+    if (!user) return undefined;
+    if (pendingInv.current) { const p = pendingInv.current; pendingInv.current = null; nav("investigation", p); }
+    return Push.onOpen((url) => { const p = Push.parseInv(url); if (p) nav("investigation", p); });
+  }, [user]);
   useEffect(() => {
     const h = BackHandler.addEventListener("hardwareBackPress", () => { if (stack.length > 1) { back(); return true; } return false; });
     return () => h.remove();

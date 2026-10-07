@@ -97,6 +97,12 @@ window.GI_STRINGS = {
 "hry": "सबस्टेशन पै पहलां तै नज़र राक्खण खात्तर AI ग्रिड इंटेलिजेंस",
 "pa": "ਅਗਾਊਂ ਸਬਸਟੇਸ਼ਨ ਨਿਗਰਾਨੀ ਲਈ AI-ਸੰਚਾਲਿਤ ਗਰਿੱਡ ਇੰਟੈਲੀਜੈਂਸ"
 },
+"ALERT NOTIFICATIONS": {
+"en": "ALERT NOTIFICATIONS",
+"hi": "अलर्ट सूचनाएँ",
+"hry": "अलर्ट की खबर",
+"pa": "ਅਲਰਟ ਸੂਚਨਾਵਾਂ"
+},
 "ALERTS": {
 "en": "ALERTS",
 "hi": "अलर्ट",
@@ -150,6 +156,12 @@ window.GI_STRINGS = {
 "hi": "जाँच टिप्पणी जोड़ें…",
 "hry": "जाँच की टिप्पणी लिक्खो…",
 "pa": "ਜਾਂਚ ਟਿੱਪਣੀ ਜੋੜੋ…"
+},
+"Alert notifications are working on this device.": {
+"en": "Alert notifications are working on this device.",
+"hi": "इस डिवाइस पर अलर्ट सूचनाएँ काम कर रही हैं।",
+"hry": "इस फ़ोन पै अलर्ट की खबर चालू सै।",
+"pa": "ਇਸ ਡਿਵਾਈਸ ਤੇ ਅਲਰਟ ਸੂਚਨਾਵਾਂ ਕੰਮ ਕਰ ਰਹੀਆਂ ਹਨ।"
 },
 "Alert timeline": {
 "en": "Alert timeline",
@@ -378,6 +390,12 @@ window.GI_STRINGS = {
 "hi": "गंभीर",
 "hry": "बहोत गंभीर",
 "pa": "ਗੰਭੀਰ"
+},
+"CRITICAL only": {
+"en": "CRITICAL only",
+"hi": "केवल गंभीर",
+"hry": "बस गंभीर",
+"pa": "ਸਿਰਫ਼ ਗੰਭੀਰ"
 },
 "CSV downloaded (audit-logged).": {
 "en": "CSV downloaded (audit-logged).",
@@ -853,6 +871,12 @@ window.GI_STRINGS = {
 "hry": "ग्रिड की सेहत",
 "pa": "ਗਰਿੱਡ ਸਿਹਤ"
 },
+"Get a phone notification when the AI raises an alert, even when the app is closed. Tap it to open the investigation.": {
+"en": "Get a phone notification when the AI raises an alert, even when the app is closed. Tap it to open the investigation.",
+"hi": "AI अलर्ट देने पर फ़ोन पर सूचना पाएँ, ऐप बंद होने पर भी। जाँच खोलने के लिए उस पर टैप करें।",
+"hry": "जद AI अलर्ट देवै, फ़ोन पै खबर आवैगी, ऐप बंद हो तो बी। जाँच खोलण खात्तर उसपै टैप करो।",
+"pa": "AI ਅਲਰਟ ਦੇਣ ਤੇ ਫ਼ੋਨ ਤੇ ਸੂਚਨਾ ਪਾਓ, ਐਪ ਬੰਦ ਹੋਣ ਤੇ ਵੀ। ਜਾਂਚ ਖੋਲ੍ਹਣ ਲਈ ਉਸ ਤੇ ਟੈਪ ਕਰੋ।"
+},
 "Grid health": {
 "en": "Grid health",
 "hi": "ग्रिड स्वास्थ्य",
@@ -870,6 +894,12 @@ window.GI_STRINGS = {
 "hi": "GridIntel होम",
 "hry": "GridIntel होम",
 "pa": "GridIntel ਹੋਮ"
+},
+"GridIntel test notification": {
+"en": "GridIntel test notification",
+"hi": "GridIntel टेस्ट सूचना",
+"hry": "GridIntel टेस्ट खबर",
+"pa": "GridIntel ਟੈਸਟ ਸੂਚਨਾ"
 },
 "HIGH RISK": {
 "en": "HIGH RISK",
@@ -1381,6 +1411,12 @@ window.GI_STRINGS = {
 "hry": "टिप्पणी बचगी",
 "pa": "ਟਿੱਪਣੀ ਸੰਭਾਲੀ ਗਈ"
 },
+"NOTIFY ME FOR": {
+"en": "NOTIFY ME FOR",
+"hi": "मुझे सूचना दें",
+"hry": "मन्नै खबर दियो",
+"pa": "ਮੈਨੂੰ ਸੂਚਨਾ ਦਿਓ"
+},
 "Newest anomaly": {
 "en": "Newest anomaly",
 "hi": "नवीनतम असामान्यता",
@@ -1489,6 +1525,36 @@ window.GI_STRINGS = {
 "hry": "इस सबस्टेशन पै कोनी लिख्या।",
 "pa": "ਇਸ ਸਬਸਟੇਸ਼ਨ ਤੇ ਦਰਜ ਨਹੀਂ।"
 },
+"Notifications are blocked for this site. Allow them in the browser or phone settings.": {
+"en": "Notifications are blocked for this site. Allow them in the browser or phone settings.",
+"hi": "इस साइट के लिए सूचनाएँ रुकी हुई हैं। ब्राउज़र या फ़ोन की सेटिंग में अनुमति दें।",
+"hry": "इस साइट खात्तर खबर रुकी होई सै। ब्राउज़र या फ़ोन की सेटिंग म्ह इजाज़त दो।",
+"pa": "ਇਸ ਸਾਈਟ ਲਈ ਸੂਚਨਾਵਾਂ ਰੁਕੀਆਂ ਹਨ। ਬ੍ਰਾਊਜ਼ਰ ਜਾਂ ਫ਼ੋਨ ਦੀ ਸੈਟਿੰਗ ਵਿੱਚ ਇਜਾਜ਼ਤ ਦਿਓ।"
+},
+"Notifications are on for this device.": {
+"en": "Notifications are on for this device.",
+"hi": "इस डिवाइस पर सूचनाएँ चालू हैं।",
+"hry": "इस फ़ोन पै खबर चालू सै।",
+"pa": "ਇਸ ਡਿਵਾਈਸ ਤੇ ਸੂਚਨਾਵਾਂ ਚਾਲੂ ਹਨ।"
+},
+"Notifications turned off.": {
+"en": "Notifications turned off.",
+"hi": "सूचनाएँ बंद कर दी गईं।",
+"hry": "खबर बंद करदी।",
+"pa": "ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰ ਦਿੱਤੀਆਂ।"
+},
+"OFF": {
+"en": "OFF",
+"hi": "बंद",
+"hry": "बंद",
+"pa": "ਬੰਦ"
+},
+"ON": {
+"en": "ON",
+"hi": "चालू",
+"hry": "चालू",
+"pa": "ਚਾਲੂ"
+},
 "ONLINE": {
 "en": "ONLINE",
 "hi": "चालू",
@@ -1506,6 +1572,12 @@ window.GI_STRINGS = {
 "hi": "02 Feb 2026 10:00 को 220 kV Sector-46 पर 11 kV T-I वोल्टेज 0 kV दर्ज हुआ; 10 Feb 2026 08:00 को T-2 इनकमर और कई फीडर 0 A पर आ गए जबकि T-4 का लोड बढ़ा। दोनों अनदेखे-दिन मॉडलों से उच्च-जोखिम जाँच के रूप में सामने आते हैं।",
 "hry": "02 Feb 2026 10:00 नै 220 kV Sector-46 पै 11 kV T-I वोल्टेज 0 kV लिख्या गया; 10 Feb 2026 08:00 नै T-2 इनकमर अर कई फीडर 0 A पै आगे अर T-4 का लोड बधग्या। दोनूं बिना देक्खे दिन के मॉडलां तै बड्डे खतरे की जाँच बण कै आवैं सैं।",
 "pa": "02 Feb 2026 10:00 ਨੂੰ 220 kV Sector-46 ਤੇ 11 kV T-I ਵੋਲਟੇਜ 0 kV ਦਰਜ ਹੋਇਆ; 10 Feb 2026 08:00 ਨੂੰ T-2 ਇਨਕਮਰ ਅਤੇ ਕਈ ਫੀਡਰ 0 A ਤੇ ਆ ਗਏ ਜਦਕਿ T-4 ਦਾ ਲੋਡ ਵਧਿਆ। ਦੋਵੇਂ ਅਣਦੇਖੇ-ਦਿਨ ਮਾਡਲਾਂ ਤੋਂ ਉੱਚ-ਖ਼ਤਰਾ ਜਾਂਚ ਵਜੋਂ ਸਾਹਮਣੇ ਆਉਂਦੇ ਹਨ।"
+},
+"On iPhone, first add GridIntel to the Home Screen (Share → Add to Home Screen), then open it from there to turn on notifications.": {
+"en": "On iPhone, first add GridIntel to the Home Screen (Share → Add to Home Screen), then open it from there to turn on notifications.",
+"hi": "iPhone पर पहले GridIntel को होम स्क्रीन पर जोड़ें (Share → Add to Home Screen), फिर वहीं से खोलकर सूचनाएँ चालू करें।",
+"hry": "iPhone पै पहलां GridIntel नै होम स्क्रीन पै जोड़ो (Share → Add to Home Screen), फेर उड़े तै खोल कै खबर चालू करो।",
+"pa": "iPhone ਤੇ ਪਹਿਲਾਂ GridIntel ਨੂੰ ਹੋਮ ਸਕ੍ਰੀਨ ਤੇ ਜੋੜੋ (Share → Add to Home Screen), ਫਿਰ ਉੱਥੋਂ ਖੋਲ੍ਹ ਕੇ ਸੂਚਨਾਵਾਂ ਚਾਲੂ ਕਰੋ।"
 },
 "One pipeline, two clients, no fabricated data": {
 "en": "One pipeline, two clients, no fabricated data",
@@ -1951,6 +2023,12 @@ window.GI_STRINGS = {
 "hry": "SCADA लाइव",
 "pa": "SCADA ਲਾਈਵ"
 },
+"SEND TEST": {
+"en": "SEND TEST",
+"hi": "टेस्ट भेजें",
+"hry": "टेस्ट भेज्जो",
+"pa": "ਟੈਸਟ ਭੇਜੋ"
+},
 "SESSION": {
 "en": "SESSION",
 "hi": "सत्र",
@@ -2004,6 +2082,12 @@ window.GI_STRINGS = {
 "hi": "टिप्पणी सहेजें",
 "hry": "टिप्पणी बचाओ",
 "pa": "ਟਿੱਪਣੀ ਸੰਭਾਲੋ"
+},
+"Saved.": {
+"en": "Saved.",
+"hi": "सहेजा गया।",
+"hry": "सेव होग्या।",
+"pa": "ਸੇਵ ਹੋ ਗਿਆ।"
 },
 "Search": {
 "en": "Search",
@@ -2197,6 +2281,18 @@ window.GI_STRINGS = {
 "hry": "रुझान",
 "pa": "ਰੁਝਾਨ"
 },
+"TURN OFF": {
+"en": "TURN OFF",
+"hi": "बंद करें",
+"hry": "बंद करो",
+"pa": "ਬੰਦ ਕਰੋ"
+},
+"TURN ON NOTIFICATIONS": {
+"en": "TURN ON NOTIFICATIONS",
+"hi": "सूचनाएँ चालू करें",
+"hry": "खबर चालू करो",
+"pa": "ਸੂਚਨਾਵਾਂ ਚਾਲੂ ਕਰੋ"
+},
 "Temperature": {
 "en": "Temperature",
 "hi": "तापमान",
@@ -2227,11 +2323,29 @@ window.GI_STRINGS = {
 "hry": "टेम्पोरल-विंडो AE",
 "pa": "ਟੈਂਪੋਰਲ-ਵਿੰਡੋ AE"
 },
+"Test not delivered. Turn notifications off and on again.": {
+"en": "Test not delivered. Turn notifications off and on again.",
+"hi": "टेस्ट नहीं पहुँचा। सूचनाएँ बंद करके फिर चालू करें।",
+"hry": "टेस्ट कोनी पहुँच्या। खबर बंद करके फेर चालू करो।",
+"pa": "ਟੈਸਟ ਨਹੀਂ ਪਹੁੰਚਿਆ। ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰਕੇ ਫਿਰ ਚਾਲੂ ਕਰੋ।"
+},
+"Test sent. It should arrive in a few seconds.": {
+"en": "Test sent. It should arrive in a few seconds.",
+"hi": "टेस्ट भेजा गया। कुछ सेकंड में आना चाहिए।",
+"hry": "टेस्ट भेज दिया। थोड़ी देर म्ह आ ज्यागा।",
+"pa": "ਟੈਸਟ ਭੇਜਿਆ। ਕੁਝ ਸਕਿੰਟਾਂ ਵਿੱਚ ਆਉਣਾ ਚਾਹੀਦਾ ਹੈ।"
+},
 "The replay will rewind to the first record. Alerts raised so far are kept until the next start.": {
 "en": "The replay will rewind to the first record. Alerts raised so far are kept until the next start.",
 "hi": "रीप्ले पहले रिकॉर्ड पर लौट जाएगा। अब तक के अलर्ट अगली शुरुआत तक रहेंगे।",
 "hry": "रीप्ले पहलड़े रिकॉर्ड पै उल्टा जावैगा। ईब तक के अलर्ट अगली बार शुरू होण तक रहवैंगे।",
 "pa": "ਰੀਪਲੇ ਪਹਿਲੇ ਰਿਕਾਰਡ ਤੇ ਵਾਪਸ ਜਾਵੇਗਾ। ਹੁਣ ਤੱਕ ਦੇ ਅਲਰਟ ਅਗਲੀ ਸ਼ੁਰੂਆਤ ਤੱਕ ਰਹਿਣਗੇ।"
+},
+"This device or browser does not support notifications. Use Chrome on Android, or the Home Screen app on iPhone.": {
+"en": "This device or browser does not support notifications. Use Chrome on Android, or the Home Screen app on iPhone.",
+"hi": "यह डिवाइस या ब्राउज़र सूचनाएँ सपोर्ट नहीं करता। Android पर Chrome या iPhone पर होम स्क्रीन ऐप इस्तेमाल करें।",
+"hry": "यो फ़ोन या ब्राउज़र खबर कोनी दिखा सकदा। Android पै Chrome या iPhone पै होम स्क्रीन आळा ऐप बरतो।",
+"pa": "ਇਹ ਡਿਵਾਈਸ ਜਾਂ ਬ੍ਰਾਊਜ਼ਰ ਸੂਚਨਾਵਾਂ ਸਪੋਰਟ ਨਹੀਂ ਕਰਦਾ। Android ਤੇ Chrome ਜਾਂ iPhone ਤੇ ਹੋਮ ਸਕ੍ਰੀਨ ਐਪ ਵਰਤੋ।"
 },
 "This prototype is intended for research, monitoring and decision-support purposes. Risk scores and anomaly alerts are model-generated indicators and must not be treated as certified protection or fault-diagnosis outputs.": {
 "en": "This prototype is intended for research, monitoring and decision-support purposes. Risk scores and anomaly alerts are model-generated indicators and must not be treated as certified protection or fault-diagnosis outputs.",
@@ -2316,6 +2430,12 @@ window.GI_STRINGS = {
 "hi": "बिना लेबल का मूल्यांकन",
 "hry": "बिना लेबल की जाँच",
 "pa": "ਬਿਨਾਂ ਲੇਬਲ ਮੁਲਾਂਕਣ"
+},
+"UPDATE": {
+"en": "UPDATE",
+"hi": "अपडेट",
+"hry": "अपडेट",
+"pa": "ਅੱਪਡੇਟ"
 },
 "USER": {
 "en": "USER",
@@ -2406,6 +2526,12 @@ window.GI_STRINGS = {
 "hi": "चेतावनी",
 "hry": "चेतावणी",
 "pa": "ਚੇਤਾਵਨੀ"
+},
+"WARNING and above": {
+"en": "WARNING and above",
+"hi": "चेतावनी और ऊपर",
+"hry": "चेतावणी अर ऊप्पर",
+"pa": "ਚੇਤਾਵਨੀ ਅਤੇ ਉੱਪਰ"
 },
 "WATCH": {
 "en": "WATCH",

@@ -167,3 +167,26 @@ class ArtifactBundle(Base):
     size_bytes: Mapped[int] = mapped_column(Integer)
     manifest: Mapped[dict | None] = mapped_column(JSON)
     data: Mapped[bytes] = mapped_column(LargeBinary)
+
+
+class PushSubscription(Base):
+    """A browser/phone that asked for alert notifications (Web Push, RFC 8030/8291)."""
+    __tablename__ = "push_subscriptions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    username: Mapped[str] = mapped_column(String(64), index=True)
+    endpoint: Mapped[str] = mapped_column(String(1024), unique=True)
+    p256dh: Mapped[str] = mapped_column(String(128))
+    auth: Mapped[str] = mapped_column(String(64))
+    min_category: Mapped[str] = mapped_column(String(16), default="HIGH RISK")
+    lang: Mapped[str] = mapped_column(String(8), default="en")
+    failures: Mapped[int] = mapped_column(Integer, default=0)
+    last_sent_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class AppSecret(Base):
+    """Server-generated secrets that must survive restarts (e.g. the VAPID key used to sign push messages)."""
+    __tablename__ = "app_secrets"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

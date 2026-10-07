@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, TextInput, View } from "react-native";
 import { Text, tr } from "./i18n";
 import { api, getBase, setBase, setToken } from "./api";
+import * as Push from "./push";
 import { Badge, Btn, C, Columns, ErrorBox, LangPicker, Loading, MONO, Panel, Tile, fmt, hourFmt, riskColor, riskFill, s, tsFmt } from "./ui";
 
 const DISCLAIMER = "Prototype AI risk classification — not certified protection thresholds. Risk scores and anomaly alerts are model-generated decision-support indicators, not certified protection or fault-diagnosis outputs.";
@@ -388,6 +389,51 @@ export function AnalyticsScreen({ sid, setSid }) {
 }
 
 // -------------------------------------------------------------------------------------------- PROFILE
+// Alert notifications: phones get HIGH RISK / CRITICAL (or WARNING and above) even when the app is closed.
+function NotificationsPanel() {
+  const [st, setSt] = useState(null);
+  const [level, setLevel] = useState("HIGH RISK");
+  const [msg, setMsg] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const load = () => Push.status().then(setSt).catch(() => setSt({ supported: false }));
+  useEffect(() => { load(); }, []);
+  const run = async (fn, ok) => { setBusy(true); setMsg(null); try { await fn(); setMsg(ok); } catch (e) { setMsg(e.message); } setBusy(false); load(); };
+  if (!st) return null;
+  if (!st.supported) {
+    return (
+      <Panel title="ALERT NOTIFICATIONS">
+        <Text style={s.dim}>{Push.isIOS() && !Push.standalone()
+          ? "On iPhone, first add GridIntel to the Home Screen (Share → Add to Home Screen), then open it from there to turn on notifications."
+          : "This device or browser does not support notifications. Use Chrome on Android, or the Home Screen app on iPhone."}</Text>
+      </Panel>
+    );
+  }
+  const chip = (v, label) => (
+    <Pressable key={v} onPress={() => setLevel(v)} style={{ paddingVertical: 7, paddingHorizontal: 11, borderRadius: 16, borderWidth: 1, marginRight: 8, marginBottom: 8,
+      borderColor: level === v ? C.accent : C.line2, backgroundColor: level === v ? C.accent + "22" : C.bg2 }}>
+      <Text style={{ color: level === v ? C.accent : C.dim, fontSize: 12, fontWeight: "600" }}>{label}</Text>
+    </Pressable>
+  );
+  return (
+    <Panel title="ALERT NOTIFICATIONS" hint={st.subscribed ? "ON" : "OFF"}>
+      <Text style={[s.dim, { marginBottom: 10 }]}>Get a phone notification when the AI raises an alert, even when the app is closed. Tap it to open the investigation.</Text>
+      {st.permission === "denied" ? <Text style={{ color: "#ff8c8c", marginBottom: 8 }}>Notifications are blocked for this site. Allow them in the browser or phone settings.</Text> : null}
+      <Text style={s.kvK}>NOTIFY ME FOR</Text>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 6 }}>{chip("HIGH RISK", "HIGH RISK + CRITICAL")}{chip("WARNING", "WARNING and above")}{chip("CRITICAL", "CRITICAL only")}</View>
+      {st.subscribed ? (
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <Btn title="UPDATE" style={{ flex: 1 }} disabled={busy} onPress={() => run(() => Push.enable(level), "Saved.")} />
+          <Btn title="SEND TEST" style={{ flex: 1 }} disabled={busy} onPress={() => run(async () => { const r = await Push.sendTest(); if (!r.sent) throw new Error("Test not delivered. Turn notifications off and on again."); }, "Test sent. It should arrive in a few seconds.")} />
+          <Btn title="TURN OFF" style={{ flex: 1 }} disabled={busy} onPress={() => run(Push.disable, "Notifications turned off.")} />
+        </View>
+      ) : (
+        <Btn title={busy ? "…" : "TURN ON NOTIFICATIONS"} kind="primary" disabled={busy} onPress={() => run(() => Push.enable(level), "Notifications are on for this device.")} />
+      )}
+      {msg ? <Text style={[s.faint, { marginTop: 8 }]}>{msg}</Text> : null}
+    </Panel>
+  );
+}
+
 export function ProfileScreen({ user, onLogout }) {
   const { data, error, refresh } = useData(() => api.get("/models"), []);
   return (
@@ -395,6 +441,7 @@ export function ProfileScreen({ user, onLogout }) {
       {data ? (
         <Scroll>
           <Panel title="Language"><LangPicker /></Panel>
+          <NotificationsPanel />
           <Panel title="PROFILE"><Text style={s.kvK}>USER</Text><Text style={s.kvV}>{user?.display_name || user?.username}</Text>
             <Text style={s.kvK}>ROLE</Text><Text style={s.kvV}>{user?.role}</Text><Text style={s.kvK}>API</Text><Text style={s.kvV}>{getBase()}</Text></Panel>
           <Panel title="SYSTEM">

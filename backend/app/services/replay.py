@@ -15,6 +15,7 @@ from ..core.config import get_settings
 from ..core.observability import ALERTS_RAISED, REPLAY_CURSOR
 from ..db.models import Alert
 from ..db.session import session_scope
+from . import push
 from .store import Store, short_name
 
 SPEEDS = (1, 2, 5, 10)
@@ -83,6 +84,7 @@ class ReplayEngine:
                 row["id"] = a.id
             ALERTS_RAISED.labels(r["risk_category"]).inc()
             raised.append(row)
+            push.notify_alert(row)             # phones that opted in get it even with the app closed
             self.events.append({"type": "ALERT", "alert_id": row["id"], "substation_id": sid, "substation_name": s["name"],
                                 "timestamp": ts, "risk_category": r["risk_category"], "risk_score": r["risk_score"],
                                 "confidence": r["confidence"], "message": row["message"], "parameter_label": label,

@@ -21,6 +21,7 @@ COPY frontend/ frontend/
 COPY --from=mobile /mobile/dist/ mobile/dist/
 COPY data/sources/ data/sources/
 COPY scripts/ scripts/
+COPY i18n/ i18n/
 RUN useradd --create-home --uid 10001 gridintel && mkdir -p /data /models && chown -R gridintel /data /models /app
 USER gridintel
 EXPOSE 8000

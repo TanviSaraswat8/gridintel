@@ -21,7 +21,7 @@ from sqlalchemy import text
 from starlette.exceptions import HTTPException
 
 from .api.deps import STATE
-from .api.v1 import admin, auth, grid, intel
+from .api.v1 import admin, auth, grid, intel, push
 from .core.cache import cache, init_cache
 from .core.config import DISCLAIMER, ROOT, get_settings
 from .core.observability import ERRORS, HTTP_LATENCY, HTTP_REQUESTS, metrics_payload, request_id_var, setup_logging
@@ -162,7 +162,7 @@ def metrics():
     return Response(body, media_type=ctype)
 
 
-for r in (auth.router, grid.router, intel.router, admin.router):
+for r in (auth.router, grid.router, intel.router, admin.router, push.router):
     app.include_router(r, prefix="/api/v1")
 
 mimetypes.add_type("application/manifest+json", ".webmanifest")  # slim images lack /etc/mime.types
