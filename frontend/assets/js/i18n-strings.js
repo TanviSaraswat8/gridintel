@@ -559,6 +559,12 @@ window.GI_STRINGS = {
 "hry": "ईब का हाल",
 "pa": "ਮੌਜੂਦਾ ਸਥਿਤੀ"
 },
+"Current time (IST)": {
+"en": "Current time (IST)",
+"hi": "वर्तमान समय (IST)",
+"hry": "इब का टैम (IST)",
+"pa": "ਮੌਜੂਦਾ ਸਮਾਂ (IST)"
+},
 "Current value": {
 "en": "Current value",
 "hi": "वर्तमान मान",
@@ -1417,6 +1423,12 @@ window.GI_STRINGS = {
 "hry": "मन्नै खबर दियो",
 "pa": "ਮੈਨੂੰ ਸੂਚਨਾ ਦਿਓ"
 },
+"NOW {t}": {
+"en": "NOW {t}",
+"hi": "अभी {t}",
+"hry": "इब {t}",
+"pa": "ਹੁਣ {t}"
+},
 "Newest anomaly": {
 "en": "Newest anomaly",
 "hi": "नवीनतम असामान्यता",
@@ -1950,6 +1962,12 @@ window.GI_STRINGS = {
 "hi": "रीप्ले इंजन",
 "hry": "रीप्ले इंजन",
 "pa": "ਰੀਪਲੇ ਇੰਜਣ"
+},
+"Replay record time (from the log sheet, IST)": {
+"en": "Replay record time (from the log sheet, IST)",
+"hi": "रीप्ले रिकॉर्ड का समय (लॉग शीट से, IST)",
+"hry": "रीप्ले रिकॉर्ड का टैम (लॉग शीट तै, IST)",
+"pa": "ਰੀਪਲੇ ਰਿਕਾਰਡ ਦਾ ਸਮਾਂ (ਲੌਗ ਸ਼ੀਟ ਤੋਂ, IST)"
 },
 "Requires OPERATOR role": {
 "en": "Requires OPERATOR role",

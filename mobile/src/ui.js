@@ -85,11 +85,18 @@ export function Btn({ title, onPress, kind, style, disabled }) {
   );
 }
 
+// Wall-clock time in India Standard Time (the replay time beside it is the log-sheet hour, already IST).
+const IST_FMT = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+export const istClock = () => IST_FMT.format(new Date()) + " IST";
+
 export function ModeBanner({ status }) {
+  const [now, setNow] = React.useState(istClock());
+  React.useEffect(() => { const id = setInterval(() => setNow(istClock()), 1000); return () => clearInterval(id); }, []);
   return (
     <View style={s.mode}>
       <View style={s.modeBadge}><Text style={s.modeBadgeT}>HISTORICAL REPLAY</Text></View>
-      <Text style={s.modeT}>{status ? `${tsFmt(status.timestamp)} · ${status.mode}` : "connecting…"}</Text>
+      <Text style={[s.modeT, { flex: 1 }]} numberOfLines={1}>{status ? `${tsFmt(status.timestamp)} · ${status.mode}` : "connecting…"}</Text>
+      <Text noTranslate style={[s.modeT, { color: C.dim, fontVariant: ["tabular-nums"] }]}>{now}</Text>
     </View>
   );
 }

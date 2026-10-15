@@ -1,6 +1,6 @@
 // GridIntel web — page views.
 import { S, api, badge, bars, closeDrawer, cls, color, download, drawer, emptyState, esc, fmt, gauge, line, riskColorVal, riskSet,
-  SERIES, skeleton, toast, ts, tsShort } from "./core.js";
+  SERIES, istFrom, skeleton, toast, ts, tsShort } from "./core.js";
 
 const $v = () => document.getElementById("view");
 const sub = (id) => S.subs.find((x) => x.id === id) || {};
@@ -378,11 +378,11 @@ export async function models() {
   const ev = m.evaluation || {}, subsEv = ev.substations || {}, rev = ev.reviewed_events || [];
   const md = m.models;
   const card = (k, title) => { const x = md[k]; return `<div class="panel"><h3>${esc(title)} <span>${x.status === "trained" ? '<span class="badge c-NORMAL">TRAINED</span>' : '<span class="badge c-NA">NOT TRAINED</span>'}</span></h3>
-    <div class="mono" style="font-size:15px">${esc(x.name)}</div><div class="tiny dim">${x.version ? "v" + esc(x.version) + " · " : ""}${x.created_at ? ts(x.created_at.slice(0, 19)) + " UTC" : ""}</div>
+    <div class="mono" style="font-size:15px">${esc(x.name)}</div><div class="tiny dim">${x.version ? "v" + esc(x.version) + " · " : ""}${x.created_at ? istFrom(x.created_at) : ""}</div>
     ${x.config ? `<div class="sp"></div><table><tbody>${Object.entries(x.config).map(([a, b]) => `<tr><td class="faint">${esc(a)}</td><td class="mono tiny">${esc(b)}</td></tr>`).join("")}</tbody></table>` : `<p class="dim tiny">${esc(x.reason || "")}</p>`}
     ${m.component_score_summary[{ isolation_forest: "iforest", autoencoder: "autoencoder", temporal_autoencoder: "temporal_ae" }[k]] ? `<div class="tiny faint" style="margin-top:8px">calibrated score mean ${fmt(m.component_score_summary[{ isolation_forest: "iforest", autoencoder: "autoencoder", temporal_autoencoder: "temporal_ae" }[k]].mean, 1)}</div>` : ""}</div>`; };
   $v().innerHTML = `
-  <div class="page-head"><div><h1>AI Model Lab</h1><div class="sub">${esc(m.ensemble.name)} · trained ${ts(m.ensemble.created_at.slice(0, 19))} UTC · run <span class="mono">${esc(m.ensemble.run_id)}</span></div></div>
+  <div class="page-head"><div><h1>AI Model Lab</h1><div class="sub">${esc(m.ensemble.name)} · trained ${istFrom(m.ensemble.created_at)} · run <span class="mono">${esc(m.ensemble.run_id)}</span></div></div>
     <span class="badge c-WATCH">${esc(m.evaluation_mode)}</span></div>
   <div class="kpis">
     <div class="kpi"><div class="k">Current model</div><div class="v" style="font-size:18px">Ensemble v${esc(m.ensemble.version)}</div><div class="s">IF ${m.ensemble.weights.iforest} · AE ${m.ensemble.weights.autoencoder} · TW-AE ${m.ensemble.weights.temporal_ae} + rules v${esc(m.ensemble.rules_version)}</div></div>

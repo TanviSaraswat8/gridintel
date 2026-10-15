@@ -36,6 +36,13 @@ function shift(t) {
   return [d.toISOString().slice(0, 10), "24:00"];
 }
 export const ts = (t) => { if (!t) return "—"; const [d, h] = shift(t); return `${d.slice(8, 10)} ${MON[+d.slice(5, 7) - 1]} ${d.slice(0, 4)} · ${h}`; };
+// Wall-clock times in India Standard Time. Log-sheet record times (ts/tsShort) are already local IST hours
+// and are shown as logged; server timestamps (UTC) are converted with istFrom.
+const IST = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+const istParts = (d) => Object.fromEntries(IST.formatToParts(d).map((p) => [p.type, p.value]));
+export const istNow = () => { const p = istParts(new Date()); return `${p.day} ${p.month} ${p.year} · ${p.hour}:${p.minute}:${p.second} IST`; };
+export const istFrom = (iso) => { if (!iso) return "—"; const d = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(iso) ? iso : iso + "Z"); if (isNaN(d)) return "—";
+  const p = istParts(d); return `${p.day} ${p.month} ${p.year} · ${p.hour}:${p.minute} IST`; };
 export const tsShort = (t) => { if (!t) return ""; const [d, h] = shift(t); return `${d.slice(8, 10)}/${d.slice(5, 7)} ${h}`; };
 export const cls = (c) => "c-" + String(c || "NA").replace(/\s+/g, "");
 export const badge = (c) => `<span class="badge ${cls(c)}">${esc(c || "NO DATA")}</span>`;
