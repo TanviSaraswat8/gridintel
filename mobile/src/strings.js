@@ -1177,6 +1177,12 @@ export const STRINGS = {
 "hry": "LODO बिना देक्खे दिन पै",
 "pa": "LODO ਅਣਦੇਖੇ ਦਿਨ ਤੇ"
 },
+"LOG": {
+"en": "LOG",
+"hi": "लॉग",
+"hry": "लॉग",
+"pa": "ਲੌਗ"
+},
 "LSTM Autoencoder": {
 "en": "LSTM Autoencoder",
 "hi": "LSTM ऑटोएनकोडर",
@@ -2274,6 +2280,18 @@ export const STRINGS = {
 "hi": "यह रीप्ले",
 "hry": "यो रीप्ले",
 "pa": "ਇਹ ਰੀਪਲੇ"
+},
+"TODAY": {
+"en": "TODAY",
+"hi": "आज",
+"hry": "आज",
+"pa": "ਅੱਜ"
+},
+"TODAY {t}": {
+"en": "TODAY {t}",
+"hi": "आज {t}",
+"hry": "आज {t}",
+"pa": "ਅੱਜ {t}"
 },
 "TOP CONTRIBUTING SIGNALS": {
 "en": "TOP CONTRIBUTING SIGNALS",

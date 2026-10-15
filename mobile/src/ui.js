@@ -85,18 +85,32 @@ export function Btn({ title, onPress, kind, style, disabled }) {
   );
 }
 
-// Wall-clock time in India Standard Time (the replay time beside it is the log-sheet hour, already IST).
-const IST_FMT = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-export const istClock = () => IST_FMT.format(new Date()) + " IST";
+// Today's date and time in India Standard Time, from the clock (never from code): the device clock corrected by
+// the server's clock (/health server_time). The replay time is the log-sheet hour being replayed (already IST).
+const IST_FMT = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric",
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+let clockOffsetMs = 0;
+export function syncClock(serverEpochSec, sentAt, receivedAt) {
+  if (typeof serverEpochSec === "number") clockOffsetMs = serverEpochSec * 1000 - (sentAt + receivedAt) / 2;
+}
+export const istClock = () => {
+  const p = Object.fromEntries(IST_FMT.formatToParts(new Date(Date.now() + clockOffsetMs)).map((x) => [x.type, x.value]));
+  return `${p.day} ${p.month} ${p.year} · ${p.hour}:${p.minute}:${p.second} IST`;
+};
 
 export function ModeBanner({ status }) {
   const [now, setNow] = React.useState(istClock());
   React.useEffect(() => { const id = setInterval(() => setNow(istClock()), 1000); return () => clearInterval(id); }, []);
   return (
-    <View style={s.mode}>
-      <View style={s.modeBadge}><Text style={s.modeBadgeT}>HISTORICAL REPLAY</Text></View>
-      <Text style={[s.modeT, { flex: 1 }]} numberOfLines={1}>{status ? `${tsFmt(status.timestamp)} · ${status.mode}` : "connecting…"}</Text>
-      <Text noTranslate style={[s.modeT, { color: C.dim, fontVariant: ["tabular-nums"] }]}>{now}</Text>
+    <View style={[s.mode, { flexDirection: "column", alignItems: "stretch", gap: 4 }]}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <Text style={[s.modeT, { color: C.dim }]}>TODAY</Text>
+        <Text noTranslate style={[s.modeT, { fontVariant: ["tabular-nums"] }]}>{now}</Text>
+      </View>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <View style={s.modeBadge}><Text style={s.modeBadgeT}>HISTORICAL REPLAY</Text></View>
+        <Text style={[s.modeT, { flex: 1 }]} numberOfLines={1}>{status ? `LOG ${tsFmt(status.timestamp)} · ${status.mode}` : "connecting…"}</Text>
+      </View>
     </View>
   );
 }

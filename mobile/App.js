@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, BackHandler, Pressable, StatusBar, View } from "react-native";
 import { Text, useLang } from "./src/i18n";
-import { api, setOnUnauthorized, setToken } from "./src/api";
+import { api, getBase, setOnUnauthorized, setToken } from "./src/api";
 import * as Push from "./src/push";
 import {
   AlertsScreen, AnalyticsScreen, GridScreen, HomeScreen, InvestigationScreen, LoginScreen, ProfileScreen, ScadaScreen, SubstationScreen,
 } from "./src/screens";
-import { C, MONO, ModeBanner, riskColor, tsFmt } from "./src/ui";
+import { C, MONO, ModeBanner, riskColor, syncClock, tsFmt } from "./src/ui";
 
 const TABS = [{ key: "home", label: "HOME" }, { key: "grid", label: "GRID" }, { key: "alerts", label: "ALERTS" }, { key: "analytics", label: "ANALYTICS" }];
 const TITLES = { home: "Command Center", grid: "Substations", alerts: "Alerts", analytics: "Analytics", substation: "Substation detail",
@@ -48,7 +48,12 @@ export default function App() {
   const tab = (name) => setStack([{ name, params: {} }]);
   const logout = () => { setToken(null); setUser(null); setStack([{ name: "home", params: {} }]); lastAlert.current = null; };
 
-  useEffect(() => { setOnUnauthorized(logout); Push.register(); }, []);
+  useEffect(() => {
+    setOnUnauthorized(logout); Push.register();
+    // correct the device clock with the server's (so "today" is right even if the phone's date is wrong)
+    const t0 = Date.now();
+    fetch(getBase() + "/health").then((r) => r.json()).then((h) => syncClock(h.server_time, t0, Date.now())).catch(() => {});
+  }, []);
   // notification taps: "?inv=" when the tap opened the app, a service-worker message when it was already open
   const pendingInv = useRef(Push.pendingInvestigation());
   useEffect(() => {

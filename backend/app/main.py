@@ -140,7 +140,8 @@ async def validation_error(request: Request, exc: RequestValidationError):
 @app.get("/health", tags=["system"])
 def health():
     return {"status": "ok", "service": "gridintel-api", "version": settings.version, "env": settings.app_env,
-            "data_mode": settings.data_mode_label, "demo_logins": settings.demo_users_enabled}
+            "data_mode": settings.data_mode_label, "demo_logins": settings.demo_users_enabled,
+            "server_time": time.time()}   # epoch seconds; clients correct their clock with it
 
 
 @app.get("/ready", tags=["system"])

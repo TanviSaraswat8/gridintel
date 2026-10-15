@@ -161,3 +161,9 @@ def test_docs_csp_allows_swagger_but_app_stays_strict(client):
 
 def test_health_reports_demo_login_setting(client):
     assert isinstance(client.get("/health").json()["demo_logins"], bool)
+
+
+def test_health_reports_server_clock(client):
+    import time
+    st = client.get("/health").json()["server_time"]
+    assert abs(st - time.time()) < 5          # clients correct their clock with it; never a hardcoded date

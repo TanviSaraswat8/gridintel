@@ -40,7 +40,15 @@ export const ts = (t) => { if (!t) return "—"; const [d, h] = shift(t); return
 // and are shown as logged; server timestamps (UTC) are converted with istFrom.
 const IST = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 const istParts = (d) => Object.fromEntries(IST.formatToParts(d).map((p) => [p.type, p.value]));
-export const istNow = () => { const p = istParts(new Date()); return `${p.day} ${p.month} ${p.year} · ${p.hour}:${p.minute}:${p.second} IST`; };
+// today's date and time come from the clock, never from code: the device clock, corrected by the server's
+// clock (/health server_time) so a phone with a wrong date still shows the real IST date
+let clockOffsetMs = 0;
+export const syncClock = (serverEpochSec, sentAt, receivedAt) => {
+  if (typeof serverEpochSec !== "number") return;
+  clockOffsetMs = serverEpochSec * 1000 - (sentAt + receivedAt) / 2;
+};
+export const nowDate = () => new Date(Date.now() + clockOffsetMs);
+export const istNow = () => { const p = istParts(nowDate()); return `${p.day} ${p.month} ${p.year} · ${p.hour}:${p.minute}:${p.second} IST`; };
 export const istFrom = (iso) => { if (!iso) return "—"; const d = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(iso) ? iso : iso + "Z"); if (isNaN(d)) return "—";
   const p = istParts(d); return `${p.day} ${p.month} ${p.year} · ${p.hour}:${p.minute} IST`; };
 export const tsShort = (t) => { if (!t) return ""; const [d, h] = shift(t); return `${d.slice(8, 10)}/${d.slice(5, 7)} ${h}`; };

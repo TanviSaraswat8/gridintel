@@ -253,3 +253,5 @@ td.n, th.n { text-align: right; font-family: var(--mono); }
 
 .now { font-size: 11px; color: var(--dim); white-space: nowrap; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--line, rgba(255,255,255,.12)); font-variant-numeric: tabular-nums; }
 @media (max-width: 1100px) { .now { display: none; } }
+.clock-lbl { font-size: 9px; letter-spacing: .12em; color: var(--faint, #6b7a8c); margin-right: 4px; }
+@media (max-width: 1440px) { .now { font-size: 10.5px; } }

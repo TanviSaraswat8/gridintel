@@ -1,5 +1,5 @@
 // GridIntel web — boot, auth, router, replay polling, command palette, keyboard shortcuts.
-import { API, S, api, color, confirmDialog, destroyCharts, errorState, esc, istNow, logout, toast, ts } from "./core.js";
+import { API, S, api, color, confirmDialog, destroyCharts, errorState, esc, istNow, logout, syncClock, toast, ts } from "./core.js";
 import * as V from "./views.js";
 
 const $ = (q) => document.querySelector(q);
@@ -23,8 +23,9 @@ $("#loginForm").onsubmit = async (e) => {
 };
 $("#logout").onclick = () => logout();
 // live wall clock (IST) next to the replay record time
-const tickIst = () => { const n = $("#nowIst"); if (n) n.textContent = istNow().replace(/^.* · /, "NOW "); };
+const tickIst = () => { const n = $("#nowIst"); if (n) n.textContent = "TODAY " + istNow(); };
 tickIst(); setInterval(tickIst, 1000);
+(async () => { try { const t0 = Date.now(); const h = await fetch(API.replace(/\/api\/v1$/, "") + "/health").then((r) => r.json()); syncClock(h.server_time, t0, Date.now()); tickIst(); } catch { /* device clock */ } })();
 // demo credentials are only offered when the server has demo logins enabled (off in production)
 fetch(API.replace(/\/api\/v1$/, "") + "/health").then((r) => r.json()).then((h) => {
   if (h.demo_logins === false) {
